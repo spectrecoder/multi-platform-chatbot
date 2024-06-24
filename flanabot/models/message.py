@@ -8,7 +8,7 @@ from flanautils import Media, OrderedSet
 from multibot import Message as MultiBotMessage, User
 
 from flanabot.models.chat import Chat
-
+# from flanabot.models.chat import Chat
 
 @dataclass(eq=False)
 class Message(MultiBotMessage):
