@@ -24,16 +24,16 @@ RECOVERY_DELETED_MESSAGE_BEFORE = datetime.timedelta(hours=1)
 SCRAPING_TIMEOUT_SECONDS = 10
 
 BANNED_POLL_PHRASES = (
-    'Deja de dar por culo {presser_name} que no puedes votar aqui',
-    'No es pesao {presser_name}, que no tienes permitido votar aqui',
-    'Deja de pulsar botones que no puedes votar aqui {presser_name}',
-    '{presser_name} deja de intentar votar aqui que no puedes',
-    'Te han prohibido votar aquí {presser_name}.',
-    'No puedes votar aquí, {presser_name}.'
+ "Stop fucking around {presser_name} because you can't vote here",
+ "It's not a shame {presser_name}, you're not allowed to vote here",
+ "Stop pressing buttons you can't vote here {presser_name}",
+ "{presser_name} stop trying to vote here because you can't",
+ "You have been banned from voting here {presser_name}.",
+ "You can't vote here, {presser_name}."
 )
 
-BYE_PHRASES = ('Adiós.', 'adio', 'adioh', 'adios', 'adió', 'adiós', 'agur', 'bye', 'byyeeee', 'chao', 'hasta la vista',
-               'hasta luego', 'hasta nunca', ' hasta pronto', 'hasta la próxima', 'nos vemos', 'taluego')
+BYE_PHRASES = ('Goodbye.', 'goodbye', 'byyeeee', 'bye', 'see you again',
+ 'see you later', 'see you never', 'see you soon', 'see you next time', 'see you', 'see you later')
 
 CHANGEABLE_ROLES = defaultdict(
     lambda: defaultdict(list),
@@ -49,16 +49,12 @@ CHANGEABLE_ROLES = defaultdict(
 )
 
 DISCORD_HEAT_NAMES = [
-    'Canal Fresquito',
-    'Canal Templaillo',
-    'Canal Calentito',
-    'Canal Caloret',
-    'Canal Caliente',
-    'Canal Olor a Vasco',
-    'Canal Verano Cordobés al Sol',
-    'Canal Al rojo vivo',
-    'Canal Ardiendo',
-    'Canal INFIERNO'
+'Fresh Channel',
+ 'Hot Channel',
+ 'Caloret Channel',
+ 'Red Hot Channel',
+ 'Burning Canal',
+ 'HELL Channel'
 ]
 
 DISCORD_HOT_CHANNEL_IDS = {
@@ -69,24 +65,20 @@ DISCORD_HOT_CHANNEL_IDS = {
     'E': 829032505645596742
 }
 
-HELLO_PHRASES = ('alo', 'aloh', 'buenas', 'Hola.', 'hello', 'hey', 'hi', 'hola', 'holaaaa', 'holaaaaaaa', 'ola',
-                 'ola k ase', 'pa ti mi cola', 'saludos')
+HELLO_PHRASES = ('hello', 'hi','how are you','nice to meet you', 'hey',' dear')
 
-INSULTS = ('._.', 'aha', 'Aléjate de mi.', 'Ante la duda mi dedo corazón te saluda.', 'Baneito pa ti en breve.',
-           'Calla noob.', 'Cansino.', 'Cuéntame menos.', 'Cuéntame más.', 'Cállate ya anda.', 'Cállate.',
-           'Das penilla.', 'De verdad. Estás para encerrarte.', 'Deberían hacerte la táctica del C4.',
-           'Despídete de tu cuenta.', 'Déjame tranquilo.', 'Enjoy cancer brain.', 'Eres cortito, ¿eh?',
-           'Eres más malo que pegarle a un padre.', 'Eres más tonto que peinar bombillas.',
-           'Eres más tonto que pellizcar cristales.', 'Estás mal de la azotea.', 'Estás mal de la cabeza.',
-           'Flanagan es más guapo que tú.', 'Hablas tanta mierda que tu culo tiene envidia de tu boca.',
-           'Hay un concurso de hostias y tienes todas las papeletas.', 'Loco.', 'Más tonto y no naces.',
-           'No eres muy avispado tú...', 'Pesado.', 'Qué bien, ¿eh?', 'Que me dejes en paz.', 'Qué pesado.',
-           'Quita bicho.', 'Reportaito mi arma.', 'Reported.', 'Retard.', 'Te voy romper las pelotas.',
-           'Tú... no estás muy bien, ¿no?', 'Ya estamos otra vez...', 'Ya estamos...', 'enjoy xd',
-           'jAJjajAJjajAJjajAJajJAJajJA', 'jajaj', 'o_O', 'xd', '¿Otra vez tú?', '¿Pero cuándo te vas a callar?',
-           '¿Por qué no te callas?', '¿Quién te ha preguntado?', '¿Qué quieres?', '¿Te callas o te callo?',
-           '¿Te imaginas que me interesa?', '¿Te quieres callar?', '¿Todo bien?',
-           '¿Tú eres así o te dan apagones cerebrales?', '🖕', '😑', '🙄', '🤔', '🤨')
+INSULTS = ('._.', 'aha', 'Stay away from me.', 'When in doubt my middle finger greets you.', "I'll ban you soon.",
+ 'Shut up noob.', 'Tiring.', 'Tell me less.', 'Tell me more.', 'Shut up now.', 'Shut up.',
+ 'You give a damn.', 'Really. You are about to be locked up.', 'They should do the C4 tactics.',
+ 'Say goodbye to your account.', 'Leave me alone.', 'Enjoy cancer brain.', "You're short, huh?", 'You are meaner than hitting a father.', 'You are dumber than combing light bulbs.',
+ "You're dumber than pinching glass.", "You're sick from the roof.", "You're sick in the head.",
+ 'Flanagan is prettier than you.', 'You talk so much shit that your ass is envious of your mouth.',
+ 'There is a host contest and you have all the ballots.', 'Crazy.', "Dumfer and you won't be born.",
+ "You're not very smart...", 'Heavy.', "That's good, eh?", 'Leave me alone.', 'How annoying.',
+ 'Remove the bug.', 'Report my weapon.', 'Reported.', 'Retard.', "I'm going to break your balls.",
+ "You... you're not very well, are you?", "We're here again...", "We're here...", 'enjoy xd', "Why don't you shut up?", 'Who asked you?', 'What do you want?', "Will you shut up or I'll shut you up?",
+ "Do you imagine I'm interested?", 'Will you shut up?', 'Is everything okay?',
+ 'Are you like that or do you get brain blackouts?','🖕', '😑', '🙄', '🤔', '🤨')
 
 KEYWORDS = {
     'choose': ('choose', 'elige', 'escoge'),

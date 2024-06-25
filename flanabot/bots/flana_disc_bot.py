@@ -114,8 +114,8 @@ class FlanaDiscBot(DiscordBot, FlanaBot):
     async def _punish(self, user: int | str | User, group_: int | str | Chat | Message, message: Message = None):
         user_id = self.get_user_id(user)
         try:
-            await self.add_role(user_id, group_, 'Castigado')
-            await self.remove_role(user_id, group_, 'Persona')
+            await self.add_role(user_id, group_, 'Punished')
+            await self.remove_role(user_id, group_, 'Person')
         except AttributeError:
             raise BadRoleError(str(self._punish))
 
@@ -131,8 +131,8 @@ class FlanaDiscBot(DiscordBot, FlanaBot):
     async def _unpunish(self, user: int | str | User, group_: int | str | Chat | Message, message: Message = None):
         user_id = self.get_user_id(user)
         try:
-            await self.add_role(user_id, group_, 'Persona')
-            await self.remove_role(user_id, group_, 'Castigado')
+            await self.add_role(user_id, group_, 'Person')
+            await self.remove_role(user_id, group_, 'Punished')
         except AttributeError:
             raise BadRoleError(str(self._unpunish))
 
@@ -150,17 +150,17 @@ class FlanaDiscBot(DiscordBot, FlanaBot):
         )
         await self.delete_message(message)
         if not audit_entries:
-            await self.send_error(f'No hay entradas en el registro de auditoría <i>(desconectar y mover)</i> en la última hora.', message)
+            await self.send_error(f'There are no entries in the audit log <i>(disconnect and move)</i> in the last hour.', message)
             return
 
-        message_parts = ['<b>Registro de auditoría (solo desconectar y mover):</b>', '']
+        message_parts = ['<b>Audit log (just disconnect and move):</b>', '']
         for entry in audit_entries:
             author = await self._create_user_from_discord_user(entry.user)
-            date_string = entry.created_at.astimezone(pytz.timezone('Europe/Madrid')).strftime('%d/%m/%Y  %H:%M:%S')
+            date_string = entry.created_at.astimezone(pytz.timezone('America/Lima')).strftime('%d/%m/%Y  %H:%M:%S')
             if entry.action is discord.AuditLogAction.member_disconnect:
-                message_parts.append(f"<b>{author.name}</b> ha <b>desconectado</b> {entry.extra.count} {'usuario' if entry.extra.count == 1 else 'usuarios'}  <i>({date_string})</i>")
+                message_parts.append(f"<b>{author.name}</b> has <b>disconnected</b> {entry.extra.count} {'user' if entry.extra.count == 1 else 'users'}  <i>({date_string})</i>")
             elif entry.action is discord.AuditLogAction.member_move:
-                message_parts.append(f"<b>{author.name}</b> ha <b>movido</b> {entry.extra.count} {'usuario' if entry.extra.count == 1 else 'usuarios'} a {entry.extra.channel.name}  <i>({date_string})</i>")
+                message_parts.append(f"<b>{author.name}</b> has <b>moved</b> {entry.extra.count} {'user' if entry.extra.count == 1 else 'users'} a {entry.extra.channel.name}  <i>({date_string})</i>")
 
         await self.send('\n'.join(message_parts), message)
 
