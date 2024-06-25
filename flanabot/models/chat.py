@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 from multibot import Chat as MultiBotChat
 
-
+# from multibot import Chat as MultiBotChat
 @dataclass(eq=False)
 class Chat(MultiBotChat):
     config: dict = field(default_factory=lambda: {
