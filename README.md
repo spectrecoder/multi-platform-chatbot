@@ -57,7 +57,7 @@ SUPPORTED_LANGUAGES=en,es,fr,de</p>
 - zep-python
 ## Contributing
 
-Contributions, issues, and feature requests are welcome. Feel free to check [issues page](link_to_your_issues_page) if you want to contribute.
+Contributions, issues, and feature requests are welcome. Feel free to check [issues page](https://github.com/Kevine0921/mutil-platform-chatbot/issues) if you want to contribute.
 
 ## License
 
