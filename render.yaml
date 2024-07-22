@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: discord-bot
+    env: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ZEP_API_URL
+        sync: false
+      - key: ZEP_API_KEY
+        sync: false
+      - key: BOT_PREFIX
+        sync: false
