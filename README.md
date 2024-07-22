@@ -7,7 +7,7 @@ Our AI integration service places intelligent bots into any chat platform your b
 ## Features
 
 - **Multi-Platform Integration**: Our AI bots can be integrated into popular chat platforms like Slack, WhatsApp, Telegram, Discord, and more, ensuring seamless adoption across your organization.
-- **Enhanced Communication**: AI-powered bots assist in conversations by providing real-time information, answering queries, and facilitating smoother communication among team members. 
+- **Enhanced Communication**: AI-powered bots assist in conversations by providing real-time information, answering queries, and facilitating smoother communication among team members.
 - **Effortless Decision-Making**: Our solution allows for advanced search capabilities, making it easy for management to retrieve and analyze relevant information without sifting through endless chat logs.
 - **Custom Functions**: Tailor the AI to fit specific business needs with custom functions,
 
@@ -55,6 +55,7 @@ SUPPORTED_LANGUAGES=en,es,fr,de</p>
 - aiohttp
 - tenacity
 - zep-python
+
 ## Contributing
 
 Contributions, issues, and feature requests are welcome. Feel free to check [issues page](https://github.com/Kevine0921/mutil-platform-chatbot/issues) if you want to contribute.
@@ -67,4 +68,4 @@ Contributions, issues, and feature requests are welcome. Feel free to check [iss
 
 Your Name - shottree657@gmail.com
 
-Project Link: [https://github.com//Kevine0921](https://github.com/Kevine0921/mutil-platform-chatbot)
+Project Link: [https://github.com/Kevine0921](https://github.com/Kevine0921/mutil-platform-chatbot)
