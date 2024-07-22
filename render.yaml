@@ -1,5 +1,5 @@
 services:
-  - type: web
+  - type: worker
     name: discord-bot
     env: docker
     dockerfilePath: ./Dockerfile
