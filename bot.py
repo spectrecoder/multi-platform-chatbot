@@ -16,7 +16,6 @@ from discord import Embed, Colour
 import os
 from dotenv import load_dotenv
 import json
-from keep_alive import keep_alive
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -252,6 +251,4 @@ async def prompt(ctx):
     chunks = [response[i:i + 2000] for i in range(0, len(response), 2000)]
     for chunk in chunks:
         await ctx.send(chunk)
-
-keep_alive()
 bot.run(os.getenv("DISCORD_BOT_TOKEN"))
