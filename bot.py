@@ -185,9 +185,17 @@ async def on_message(message):
         zep_client.memory.add_memory(session_id, memory)
         print(f"Message saved: {content}")
 
+        # Increment the message counter for this session
+        if session_id not in message_counters:
+            message_counters[session_id] = 0
+        message_counters[session_id] += 1
+
+
         # Check if we need to create a summary, but not for slash commands or greetings
-        if not is_slash_command and not is_greeting:
+        if not is_slash_command and not is_greeting and message_counters[session_id]>=10:
             await check_and_summarize(session_id)
+            message_counters[session_id] = 0
+            
     except Exception as e:
         print(f"Error saving message or summarizing: {e}")
 
