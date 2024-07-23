@@ -24,6 +24,36 @@ from googleapiclient.errors import HttpError
 
 load_dotenv()
 
+BOT_COMMAND_PREFIX = os.getenv('BOT_PREFIX')
+ZEP_API_URL = os.getenv("ZEP_API_URL")
+ZEP_API_KEY = os.getenv("ZEP_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
+recent_prompts = []
+
+message_counters = {}
+
+
+
+zep_client = ZepClient(ZEP_API_URL, ZEP_API_KEY)
+
+
+
+  # Prefix for bot commands
+
+
+GREETING_PHRASES = [
+    "hello", "hi", "hey", "howdy", "greetings", "good morning", "good afternoon", 
+    "good evening", "what's up", "sup", "yo", "hiya"
+]
+
+# Compile a regex pattern for efficient matching
+GREETING_PATTERN = re.compile(r'\b(' + '|'.join(GREETING_PHRASES) + r')\b', re.IGNORECASE)
+
+# Bot Setup
+
+
 # Configuration Parameters
 # ------------------------
 
@@ -51,7 +81,7 @@ SEARCH_RESULT_LIMIT = 100  # Maximum number of results to retrieve from memory s
 MMR_LAMBDA = 0.5  # Lambda parameter for MMR reranking
 
 # Discord Bot Settings
-BOT_COMMAND_PREFIX = os.getenv('BOT_PREFIX', '!')  # Prefix for bot commands
+
 
 # Summarization Process
 SUMMARY_STYLE = "concise"  # Options: "concise", "detailed", "bullet-points"
@@ -102,25 +132,10 @@ ENABLE_NEWS_API = False  # Toggle integration with news service
 API_TIMEOUT = 5  # Maximum wait time for external API responses in seconds
 
 # API Keys and Credentials
-openai.api_key = os.getenv("OPENAI_API_KEY")
-NEWSDATA_API_KEY = os.getenv("NEWSDATA_API_KEY")
-ZEP_API_URL = os.getenv("ZEP_API_URL")
-ZEP_API_KEY = os.getenv("ZEP_API_KEY")
-OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
-TICKETMASTER_API_KEY = os.getenv("TICKETMASTER_API_KEY")
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
 
-# Bot Setup
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix=BOT_COMMAND_PREFIX, intents=intents, help_command=None)
-
-zep_client = ZepClient(ZEP_API_URL, ZEP_API_KEY)
-
-user_languages = {}
-default_language = 'en'
-recent_prompts = []
 
 def get_channel_session_id(channel_id):
     filename = "channel_sessions.txt"
@@ -146,6 +161,9 @@ def highlight_keyword(text, keyword):
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
 
+
+
+
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
@@ -155,6 +173,12 @@ async def on_message(message):
     content = message.content
     session_id = get_channel_session_id(channel_id)
 
+    # Check if the message is a command starting with '/'
+    is_slash_command = content.startswith('/')
+
+    # Check if the message is a greeting
+    is_greeting = bool(GREETING_PATTERN.search(content))
+
     try:
         memory = Memory(
             messages=[Message(role="user", content=f"{message.author.name}: {content}")],
@@ -163,8 +187,9 @@ async def on_message(message):
         zep_client.memory.add_memory(session_id, memory)
         print(f"Message saved: {content}")
 
-        # Check if we need to create a summary
-        await check_and_summarize(session_id)
+        # Check if we need to create a summary, but not for slash commands or greetings
+        if not is_slash_command and not is_greeting:
+            await check_and_summarize(session_id)
     except Exception as e:
         print(f"Error saving message or summarizing: {e}")
 
@@ -194,7 +219,10 @@ async def on_message(message):
         except Exception as e:
             print(f"Error saving bot response: {e}")
 
+    # This line is crucial for processing commands
     await bot.process_commands(message)
+
+
 
 
 async def generate_response(channel_id, user_message):
@@ -219,7 +247,7 @@ async def generate_response(channel_id, user_message):
     messages = [system_message]
     user_chat_logs = []
 
-    for memory in historical_messages[-1000:]:
+    for memory in historical_messages:
         messages.append({"role": memory.role, "content": memory.content})
         if memory.role == "user":
             content = extract_message_content(memory.content)
@@ -264,6 +292,12 @@ async def generate_response(channel_id, user_message):
         return ai_response
     except Exception as e:
         return f"An error occurred: {str(e)}"
+
+
+
+
+
+
 
 
 async def check_and_summarize(session_id):
@@ -422,47 +456,6 @@ def cosine_similarity(v1, v2):
         v2 = v2 / np.linalg.norm(v2)
     return np.dot(v1, v2)
 
-@bot.command(name='search')
-async def search(ctx, *, keyword):
-    channel_id = str(ctx.channel.id)
-    session_id = get_channel_session_id(channel_id)
-
-    async with ZepClient(ZEP_API_URL, ZEP_API_KEY) as client:
-        try:
-            historical_messages = await client.message.aget_session_messages(session_id)
-        except Exception as e:
-            await ctx.send(f"Error retrieving historical messages: {e}")
-            return
-
-    search_results = []
-    for msg in historical_messages:
-        if keyword.lower() in msg.content.lower():
-            highlighted_content = highlight_keyword(msg.content, keyword)
-            search_results.append(f"**{msg.role}**: {highlighted_content}")
-
-    if search_results:
-        response = f"Search results for '{keyword}':\n\n" + "\n\n".join(search_results[-10:])
-        if len(response) > 2000:
-            response = response[:1997] + "..."
-        await ctx.send(response)
-    else:
-        await ctx.send(f"No results found for '{keyword}'.")
-
-@bot.command(name='prompt')
-async def prompt(ctx):
-    if not recent_prompts:
-        await ctx.send("No recent prompts available.")
-        return
-
-    response = "Recent prompts:\n\n"
-    for i, item in enumerate(reversed(recent_prompts), 1):
-        response += f"{i}. Question: {item['question']}\n"
-        response += f"   Prompt:\n{item['prompt_summary']}\n\n"
-
-    chunks = [response[i:i+2000] for i in range(0, len(response), 2000)]
-    for chunk in chunks:
-        await ctx.send(chunk)
-
 # Error handling decorator
 def handle_errors(func):
     async def wrapper(*args, **kwargs):
@@ -501,6 +494,7 @@ def is_valid_message(message):
         return False
     return True
 
+
 # Rate limiting
 def rate_limit(func):
     cooldowns = {}
@@ -515,6 +509,57 @@ def rate_limit(func):
     return wrapper
 
 # Apply rate limiting to commands
+
+
+
+
+@bot.command(name='search')
+async def search(ctx, keyword: str):
+    channel_id = str(ctx.channel.id)
+    session_id = get_channel_session_id(channel_id)
+
+    async with ZepClient(ZEP_API_URL, ZEP_API_KEY) as client:
+        try:
+            historical_messages = await client.message.aget_session_messages(
+                session_id)
+        except Exception as e:
+            await ctx.send(f"Error retrieving historical messages: {e}")
+            return
+
+    search_results = []
+    for msg in historical_messages:
+        if keyword.lower() in msg.content.lower():
+            highlighted_content = highlight_keyword(msg.content, keyword)
+            search_results.append(f"**{msg.role}**: {highlighted_content}")
+
+    if search_results:
+        response = f"Search results for '{keyword}':\n\n" + "\n\n".join(
+            search_results[-10:])
+        if len(response) > 2000:
+            response = response[:1997] + "..."
+        await ctx.send(response)
+    else:
+        await ctx.send(f"No results found for '{keyword}'.")
+
+
+@bot.command(name='prompt')
+async def prompt(ctx):
+    if not recent_prompts:
+        await ctx.send("No recent prompts available.")
+        return
+
+    response = "Recent prompts:\n\n"
+    for i, item in enumerate(reversed(recent_prompts), 1):
+        response += f"{i}. Question: {item['question']}\n"
+        response += f"   Prompt:\n{item['prompt_summary']}\n\n"
+
+    chunks = [response[i:i + 2000] for i in range(0, len(response), 2000)]
+    for chunk in chunks:
+        await ctx.send(chunk)
+
+
+
+
 search = rate_limit(search)
 prompt = rate_limit(prompt)
 
