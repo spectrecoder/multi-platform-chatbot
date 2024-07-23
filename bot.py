@@ -19,8 +19,6 @@ import numpy as np
 from zep_python import (ZepClient, MemorySearchPayload)
 from zep_python.memory import Memory, Message
 
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 
 load_dotenv()
 
