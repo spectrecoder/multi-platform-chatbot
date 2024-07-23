@@ -15,6 +15,8 @@ import uuid
 from datetime import datetime, timedelta
 import json
 import numpy as np
+import asyncpg
+from asyncpg.pool import Pool
 
 from zep_python import (ZepClient, MemorySearchPayload)
 from zep_python.memory import Memory, Message
@@ -26,6 +28,60 @@ BOT_COMMAND_PREFIX = os.getenv('BOT_PREFIX')
 ZEP_API_URL = os.getenv("ZEP_API_URL")
 ZEP_API_KEY = os.getenv("ZEP_API_KEY")
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
+PG_HOST = os.getenv("PG_HOST")
+PG_PORT = os.getenv("PG_PORT")
+PG_USER = os.getenv("PG_USER")
+PG_PASSWORD = os.getenv("PG_PASSWORD")
+PG_DATABASE = os.getenv("PG_DATABASE")
+
+
+class PostgresSessionStorage:
+    def __init__(self):
+        self.pool: Pool = None
+
+    async def initialize(self):
+        self.pool = await asyncpg.create_pool(
+            host=PG_HOST,
+            port=PG_PORT,
+            user=PG_USER,
+            password=PG_PASSWORD,
+            database=PG_DATABASE
+        )
+        
+        # Create the sessions table if it doesn't exist
+        async with self.pool.acquire() as conn:
+            await conn.execute('''
+                CREATE TABLE IF NOT EXISTS sessions (
+                    channel_id BIGINT PRIMARY KEY,
+                    session_id UUID NOT NULL
+                )
+            ''')
+
+    async def get_session_id(self, channel_id: int) -> str:
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow(
+                'SELECT session_id FROM sessions WHERE channel_id = $1',
+                channel_id
+            )
+            if row:
+                return str(row['session_id'])
+            
+            # If no session exists, create a new one
+            session_id = str(uuid.uuid4())
+            await conn.execute(
+                'INSERT INTO sessions (channel_id, session_id) VALUES ($1, $2)',
+                channel_id, session_id
+            )
+            return session_id
+
+    async def close(self):
+        await self.pool.close()
+
+# Modify the bot initialization to use PostgresSessionStorage
+session_storage = PostgresSessionStorage()
+
 
 
 recent_prompts = []
@@ -135,21 +191,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix=BOT_COMMAND_PREFIX, intents=intents, help_command=None)
 
-def get_channel_session_id(channel_id):
-    filename = "channel_sessions.txt"
-    try:
-        with open(filename, "r") as f:
-            for line in f:
-                saved_channel_id, session_id = line.strip().split(",")
-                if saved_channel_id == str(channel_id):
-                    return session_id
-    except FileNotFoundError:
-        pass
 
-    session_id = str(uuid.uuid4())
-    with open(filename, "a") as f:
-        f.write(f"{channel_id},{session_id}\n")
-    return session_id
 
 def highlight_keyword(text, keyword):
     pattern = re.compile(re.escape(keyword), re.IGNORECASE)
@@ -157,9 +199,16 @@ def highlight_keyword(text, keyword):
 
 @bot.event
 async def on_ready():
+    await session_storage.initialize()
     print(f'{bot.user} has connected to Discord!')
 
+# Modify the existing get_channel_session_id function
+async def get_channel_session_id(channel_id):
+    return await session_storage.get_session_id(channel_id)
 
+@bot.event
+async def on_shutdown():
+    await session_storage.close()
 
 
 @bot.event
@@ -169,7 +218,7 @@ async def on_message(message):
 
     channel_id = str(message.channel.id)
     content = message.content
-    session_id = get_channel_session_id(channel_id)
+    session_id = await get_channel_session_id(channel_id)
 
     # Check if the message is a command starting with '/'
     is_slash_command = content.startswith('/')
@@ -227,7 +276,6 @@ async def on_message(message):
 
     # This line is crucial for processing commands
     await bot.process_commands(message)
-
 
 
 
@@ -298,10 +346,6 @@ async def generate_response(channel_id, user_message):
         return ai_response
     except Exception as e:
         return f"An error occurred: {str(e)}"
-
-
-
-
 
 
 
@@ -572,5 +616,8 @@ prompt = rate_limit(prompt)
 # Run the bot
 if __name__ == "__main__":
 
+
+
+
     print("=================", dir(zep_client.memory))
-    bot.run(os.getenv("DISCORD_BOT_TOKEN"))
+    bot.run(os.getenv("DISCORD_BOT_TOKEN"), on_shutdown=on_shutdown)
