@@ -61,9 +61,11 @@ class PostgresSessionStorage:
 
     async def get_session_id(self, channel_id: int) -> str:
         async with self.pool.acquire() as conn:
+            # Convert channel_id to integer
+            channel_id_int = int(channel_id)
             row = await conn.fetchrow(
                 'SELECT session_id FROM sessions WHERE channel_id = $1',
-                channel_id
+                channel_id_int
             )
             if row:
                 return str(row['session_id'])
@@ -72,9 +74,10 @@ class PostgresSessionStorage:
             session_id = str(uuid.uuid4())
             await conn.execute(
                 'INSERT INTO sessions (channel_id, session_id) VALUES ($1, $2)',
-                channel_id, session_id
+                channel_id_int, session_id
             )
             return session_id
+
 
     async def close(self):
         await self.pool.close()
@@ -213,7 +216,7 @@ async def on_message(message):
     if message.author == bot.user:
         return
 
-    channel_id = str(message.channel.id)
+    channel_id = message.channel.id
     content = message.content
     session_id = await get_channel_session_id(channel_id)
 
