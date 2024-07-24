@@ -6,5 +6,6 @@ tenacity
 aiohttp
 requests
 numpy
+asyncpg
 
 
