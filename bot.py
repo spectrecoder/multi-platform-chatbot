@@ -206,9 +206,6 @@ async def on_ready():
 async def get_channel_session_id(channel_id):
     return await session_storage.get_session_id(channel_id)
 
-@bot.event
-async def on_shutdown():
-    await session_storage.close()
 
 
 @bot.event
@@ -609,6 +606,11 @@ async def prompt(ctx):
 
 
 
+@bot.event
+async def on_shutdown():
+    await session_storage.close()
+
+
 
 search = rate_limit(search)
 prompt = rate_limit(prompt)
@@ -616,8 +618,5 @@ prompt = rate_limit(prompt)
 # Run the bot
 if __name__ == "__main__":
 
-
-
-
-    print("=================", dir(zep_client.memory))
+#  bot.run(os.getenv("DISCORD_BOT_TOKEN"), on_shutdown=on_shutdown)
     bot.run(os.getenv("DISCORD_BOT_TOKEN"), on_shutdown=on_shutdown)
