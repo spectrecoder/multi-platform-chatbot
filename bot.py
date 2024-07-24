@@ -24,11 +24,6 @@ from zep_python.memory import Memory, Message
 
 load_dotenv()
 
-BOT_COMMAND_PREFIX = os.getenv('BOT_PREFIX')
-ZEP_API_URL = os.getenv("ZEP_API_URL")
-ZEP_API_KEY = os.getenv("ZEP_API_KEY")
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
 
 PG_HOST = os.getenv("PG_HOST")
 PG_PORT = os.getenv("PG_PORT")
@@ -37,51 +32,15 @@ PG_PASSWORD = os.getenv("PG_PASSWORD")
 PG_DATABASE = os.getenv("PG_DATABASE")
 
 
-class PostgresSessionStorage:
-    def __init__(self):
-        self.pool: Pool = None
 
-    async def initialize(self):
-        self.pool = await asyncpg.create_pool(
-            host=PG_HOST,
-            port=PG_PORT,
-            user=PG_USER,
-            password=PG_PASSWORD,
-            database=PG_DATABASE
-        )
-        
-        # Create the sessions table if it doesn't exist
-        async with self.pool.acquire() as conn:
-            await conn.execute('''
-                CREATE TABLE IF NOT EXISTS sessions (
-                    channel_id BIGINT PRIMARY KEY,
-                    session_id UUID NOT NULL
-                )
-            ''')
 
-    async def get_session_id(self, channel_id: int) -> str:
-        async with self.pool.acquire() as conn:
-            row = await conn.fetchrow(
-                'SELECT session_id FROM sessions WHERE channel_id = $1',
-                channel_id
-            )
-            if row:
-                return str(row['session_id'])
-            
-            # If no session exists, create a new one
-            session_id = str(uuid.uuid4())
-            await conn.execute(
-                'INSERT INTO sessions (channel_id, session_id) VALUES ($1, $2)',
-                channel_id, session_id
-            )
-            return session_id
 
-    async def close(self):
-        await self.pool.close()
 
-# Modify the bot initialization to use PostgresSessionStorage
-session_storage = PostgresSessionStorage()
 
+BOT_COMMAND_PREFIX = os.getenv('BOT_PREFIX')
+ZEP_API_URL = os.getenv("ZEP_API_URL")
+ZEP_API_KEY = os.getenv("ZEP_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 recent_prompts = []
@@ -192,28 +151,69 @@ intents.message_content = True
 bot = commands.Bot(command_prefix=BOT_COMMAND_PREFIX, intents=intents, help_command=None)
 
 
-
 def highlight_keyword(text, keyword):
     pattern = re.compile(re.escape(keyword), re.IGNORECASE)
     return pattern.sub(f"*`{keyword}`*", text)
+
+
+class PostgresSessionStorage:
+    def __init__(self):
+        self.pool: Pool = None
+
+    async def initialize(self):
+        self.pool = await asyncpg.create_pool(
+            host=PG_HOST,
+            port=PG_PORT,
+            user=PG_USER,
+            password=PG_PASSWORD,
+            database=PG_DATABASE
+        )
+        
+        # Create the sessions table if it doesn't exist
+        async with self.pool.acquire() as conn:
+            await conn.execute('''
+                CREATE TABLE IF NOT EXISTS sessions (
+                    channel_id BIGINT PRIMARY KEY,
+                    session_id UUID NOT NULL
+                )
+            ''')
+
+    async def get_session_id(self, channel_id: int) -> str:
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow(
+                'SELECT session_id FROM sessions WHERE channel_id = $1',
+                channel_id
+            )
+            if row:
+                return str(row['session_id'])
+            
+            # If no session exists, create a new one
+            session_id = str(uuid.uuid4())
+            await conn.execute(
+                'INSERT INTO sessions (channel_id, session_id) VALUES ($1, $2)',
+                channel_id, session_id
+            )
+            return session_id
+
+    async def close(self):
+        await self.pool.close()
+
+session_storage = PostgresSessionStorage()
 
 @bot.event
 async def on_ready():
     await session_storage.initialize()
     print(f'{bot.user} has connected to Discord!')
 
-# Modify the existing get_channel_session_id function
 async def get_channel_session_id(channel_id):
     return await session_storage.get_session_id(channel_id)
-
-
 
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
 
-    channel_id = str(message.channel.id)
+    channel_id = message.channel.id
     content = message.content
     session_id = await get_channel_session_id(channel_id)
 
@@ -273,7 +273,6 @@ async def on_message(message):
 
     # This line is crucial for processing commands
     await bot.process_commands(message)
-
 
 
 async def generate_response(channel_id, user_message):
@@ -605,20 +604,18 @@ async def prompt(ctx):
         await ctx.send(chunk)
 
 
-@bot.event
-async def on_shutdown():
-    await session_storage.close()
-
 
 
 search = rate_limit(search)
 prompt = rate_limit(prompt)
 
+
+@bot.event
+async def on_shutdown():
+    await session_storage.close()
+
 # Run the bot
 if __name__ == "__main__":
 
-
-
-
     print("=================", dir(zep_client.memory))
-    bot.run(os.getenv("DISCORD_BOT_TOKEN"))
+    bot.run(os.getenv("DISCORD_BOT_TOKEN"), on_shutdown=on_shutdown)
