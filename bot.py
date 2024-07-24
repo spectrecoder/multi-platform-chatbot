@@ -618,5 +618,8 @@ prompt = rate_limit(prompt)
 # Run the bot
 if __name__ == "__main__":
 
-#  bot.run(os.getenv("DISCORD_BOT_TOKEN"), on_shutdown=on_shutdown)
-    bot.run(os.getenv("DISCORD_BOT_TOKEN"), on_shutdown=on_shutdown)
+    try:
+        bot.run(os.getenv("DISCORD_BOT_TOKEN"))
+    finally:
+        # Run your shutdown code here
+        asyncio.run(on_shutdown())
