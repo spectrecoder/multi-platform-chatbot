@@ -618,4 +618,4 @@ async def on_shutdown():
 if __name__ == "__main__":
 
     print("=================", dir(zep_client.memory))
-    bot.run(os.getenv("DISCORD_BOT_TOKEN"), on_shutdown=on_shutdown)
+    bot.run(os.getenv("DISCORD_BOT_TOKEN"))
