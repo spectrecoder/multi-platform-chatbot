@@ -66,6 +66,6 @@ Contributions, issues, and feature requests are welcome. Feel free to check [iss
 
 ## Contact
 
-Your Name - shottree657@gmail.com
+Contact👉- shottree657@gmail.com
 
 Project Link: [https://github.com/Kevine0921](https://github.com/Kevine0921/mutil-platform-chatbot)
