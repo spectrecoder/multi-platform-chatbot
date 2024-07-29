@@ -7,5 +7,5 @@ aiohttp
 requests
 numpy
 asyncpg
-
+watchdog
 
