@@ -6,6 +6,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 import openai
 from zep_python import ZepClient
+from zep_python.memory import Memory, Message
 
 # Load environment variables
 load_dotenv()
@@ -27,6 +28,7 @@ zep_client = ZepClient(base_url=ZEP_API_URL, api_key=ZEP_API_KEY)
 async def start(update: Update, context):
     await update.message.reply_text('Hello! I am your AI assistant. Mention me to ask questions.')
 
+
 async def handle_message(update: Update, context):
     try:
         message = update.message
@@ -37,18 +39,27 @@ async def handle_message(update: Update, context):
         logger.info(f"Received message: {text}")
 
         # Save message to Zep memory
-        session = await zep_client.get_or_create_memory_session(chat_id)
-        await session.add_memory({"role": "user", "content": text, "user_id": user_id})
+        memory = Memory(
+            messages=[
+                Message(
+                    role="user",
+                    content=text,
+                    metadata={"user_id": user_id}
+                )
+            ]
+        )
+        logger.debug(f"Adding memory: {memory}")
+        zep_client.memory.add_memory(chat_id, memory)
 
         # Check if bot is mentioned
         if context.bot.username in text:
             logger.info("Bot mentioned, generating response...")
             # Retrieve chat history
-            memories = await session.get_memories(limit=10)  # Adjust limit as needed
-            chat_history = "\n".join([f"{m.role}: {m.content}" for m in memories])
+            messages = await zep_client.memory.get_messages(chat_id, limit=10)  # Adjust limit as needed
+            chat_history = "\n".join([f"{m.role}: {m.content}" for m in messages])
 
             # Prepare messages for GPT-3.5-turbo
-            messages = [
+            gpt_messages = [
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": f"Chat history:\n{chat_history}\n\nUser: {text}"}
             ]
@@ -56,7 +67,7 @@ async def handle_message(update: Update, context):
             # Generate response using GPT-3.5-turbo
             response = await openai.ChatCompletion.acreate(
                 model="gpt-3.5-turbo",
-                messages=messages
+                messages=gpt_messages
             )
 
             reply_text = response.choices[0].message.content.strip()
@@ -64,12 +75,26 @@ async def handle_message(update: Update, context):
 
             # Send the generated response
             await update.message.reply_text(reply_text)
+
+            # Save bot's response to Zep memory
+            bot_memory = Memory(
+                messages=[
+                    Message(
+                        role="assistant",
+                        content=reply_text,
+                        metadata={"user_id": str(context.bot.id)}
+                    )
+                ]
+            )
+            zep_client.memory.add_memory(chat_id, bot_memory)
         else:
             logger.info("Bot not mentioned, no response generated.")
 
     except Exception as e:
         logger.error(f"Error in handle_message: {str(e)}")
         logger.error(traceback.format_exc())
+
+
 
 async def error_handler(update: Update, context):
     logger.error(msg="Exception while handling an update:", exc_info=context.error)

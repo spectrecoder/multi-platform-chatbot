@@ -8,8 +8,9 @@ import openai  # Assuming GPT-4-mini is accessible via OpenAI's API
 
 load_dotenv()
 
-ZEP_API_URL = os.getenv("https://zep-xzbp.onrender.com")
+ZEP_API_URL = os.getenv("ZEP_API_URL")
 ZEP_API_KEY = os.getenv("ZEP_API_KEY")
+
 openai.api_key = os.getenv("OPENAI_API_KEY")
 TELEGRAM_BOT_TOKEN= os.getenv("TELEGRAM_BOT_TOKEN")
 
@@ -53,6 +54,7 @@ async def handle_message(update: Update, context):
 
 def main():
     application = Application.builder().token("").build()
+    print("dsdffffffffffff", ZEP_API_KEY )
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
