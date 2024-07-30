@@ -45,52 +45,56 @@ else:
     logger.error("OPENAI_API_KEY not set")
 
 async def start(update: Update, context):
-    await update.message.reply_text("Hello! I'm your Telegram bot. How can I help you?")
+    await update.message.reply_text("Hello! I'm your Telegram bot. Mention me in a message to ask a question.")
 
 async def handle_message(update: Update, context):
     if not zep_client:
         await update.message.reply_text("Sorry, I'm having trouble with my memory. Please try again later.")
         return
 
-    user_message = update.message.text
-    chat_id = update.effective_chat.id
-    user_id = update.effective_user.id
+    message = update.message
+    chat_id = str(update.effective_chat.id)
+    user_id = str(update.effective_user.id)
+    user_message = message.text
 
     # Store message in Zep
     try:
-        zep_client.add_memory(str(chat_id), {
-            "user_id": str(user_id),
+        zep_client.add_memory(chat_id, {
+            "user_id": user_id,
             "message": user_message
         })
     except Exception as e:
         logger.error(f"Error adding memory to Zep: {str(e)}")
-        await update.message.reply_text("Sorry, I'm having trouble remembering our conversation. Please try again.")
-        return
 
-    # Retrieve chat history from Zep
-    try:
-        chat_history = zep_client.get_memory(str(chat_id))
-    except Exception as e:
-        logger.error(f"Error retrieving memory from Zep: {str(e)}")
-        await update.message.reply_text("Sorry, I'm having trouble recalling our conversation. Please try again.")
-        return
+    # Check if the bot is mentioned
+    if context.bot.username in message.text:
+        # Extract the question (remove the bot mention)
+        question = message.text.replace(f"@{context.bot.username}", "").strip()
 
-    # Analyze chat history with GPT-4-mini
-    try:
-        prompt = f"Chat history: {chat_history}\n\nUser: {user_message}\nBot:"
-        response = openai.Completion.create(
-            engine="gpt-4-mini",
-            prompt=prompt,
-            max_tokens=150
-        )
-        bot_response = response.choices[0].text.strip()
-    except Exception as e:
-        logger.error(f"Error generating response with OpenAI: {str(e)}")
-        await update.message.reply_text("Sorry, I'm having trouble thinking of a response. Please try again.")
-        return
+        # Retrieve chat history from Zep
+        try:
+            chat_history = zep_client.get_memory(chat_id)
+        except Exception as e:
+            logger.error(f"Error retrieving memory from Zep: {str(e)}")
+            await message.reply_text("Sorry, I'm having trouble recalling our conversation. Please try again.")
+            return
 
-    # Send response back to user
-    await update.message.reply_text(bot_response)
+        # Analyze chat history with GPT-4-mini
+        try:
+            prompt = f"Chat history: {chat_history}\n\nQuestion: {question}\nBot:"
+            response = openai.Completion.create(
+                engine="gpt-4o-mini",
+                prompt=prompt,
+                max_tokens=150
+            )
+            bot_response = response.choices[0].text.strip()
+        except Exception as e:
+            logger.error(f"Error generating response with OpenAI: {str(e)}")
+            await message.reply_text("Sorry, I'm having trouble thinking of a response. Please try again.")
+            return
+
+        # Send response back to user
+        await message.reply_text(bot_response)
 
 def main():
     if not TELEGRAM_BOT_TOKEN:

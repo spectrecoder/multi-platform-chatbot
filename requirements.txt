@@ -8,4 +8,5 @@ requests
 numpy
 asyncpg
 watchdog
+python-telegram-bot
 
