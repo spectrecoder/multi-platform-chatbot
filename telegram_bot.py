@@ -7,6 +7,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters
 import openai
 from zep_python import ZepClient
 from zep_python.memory import Memory, Message
+import uuid
 
 # Load environment variables
 load_dotenv()
@@ -28,6 +29,76 @@ zep_client = ZepClient(base_url=ZEP_API_URL, api_key=ZEP_API_KEY)
 async def start(update: Update, context):
     await update.message.reply_text('Hello! I am your AI assistant. Mention me to ask questions.')
 
+# async def handle_message(update: Update, context):
+#     try:
+#         message = update.message
+#         chat_id = str(message.chat_id)
+#         user_id = str(message.from_user.id)
+#         text = message.text
+
+#         logger.info(f"Received message: {text}")
+
+#         # Save message to Zep memory
+#         memory = Memory(
+#             messages=[
+#                 Message(
+#                     role="user",
+#                     content=text,
+#                     metadata={"user_id": user_id}
+#                 )
+#             ]
+#         )
+#         logger.debug(f"Adding memory: {memory}")
+#         zep_client.memory.add_memory(chat_id, memory)
+
+#         # Check if bot is mentioned
+#         if context.bot.username in text:
+#             logger.info("Bot mentioned, generating response...")
+            
+            
+#             # Retrieve chat history
+#             memory_content = zep_client.memory.get_memory(chat_id)
+#             messages = memory_content.messages if memory_content else []
+#             logger.info(f"Number of messages in chat history: {len(messages)}")
+#             chat_history = "\n".join([f"{m.role}: {m.content}" for m in messages])
+
+#             # Prepare messages for GPT-3.5-turbo
+#             gpt_messages = [
+#                 {"role": "system", "content": "You are a helpful assistant."},
+#                 {"role": "user", "content": f"Chat history:\n{chat_history}\n\nUser: {text}"}
+#             ]
+
+#             # Generate response using GPT-3.5-turbo
+#             response = await openai.ChatCompletion.acreate(
+#                 model="gpt-4o-mini",
+#                 messages=gpt_messages
+#             )
+
+#             reply_text = response.choices[0].message.content.strip()
+#             logger.info(f"Generated response: {reply_text}")
+
+#             # Send the generated response
+#             await update.message.reply_text(reply_text)
+
+#             # Save bot's response to Zep memory
+#             bot_memory = Memory(
+#                 messages=[
+#                     Message(
+#                         role="assistant",
+#                         content=reply_text,
+#                         metadata={"user_id": str(context.bot.id)}
+#                     )
+#                 ]
+#             )
+#             zep_client.memory.add_memory(chat_id, bot_memory)
+#         else:
+#             logger.info("Bot not mentioned, no response generated.")
+
+#     except Exception as e:
+#         logger.error(f"Error in handle_message: {str(e)}")
+#         logger.error(traceback.format_exc())
+
+
 async def handle_message(update: Update, context):
     try:
         message = update.message
@@ -37,29 +108,30 @@ async def handle_message(update: Update, context):
 
         logger.info(f"Received message: {text}")
 
+        # Generate a session_id based on chat_id
+        session_id = f"telegram_chat_{chat_id}"
+
         # Save message to Zep memory
         memory = Memory(
-            messages=[
-                Message(
-                    role="user",
-                    content=text,
-                    metadata={"user_id": user_id}
-                )
-            ]
+            messages=[Message(role="user", content=f"{user_id}: {text}")],
+            metadata={"session_id": session_id}
         )
         logger.debug(f"Adding memory: {memory}")
-        zep_client.memory.add_memory(chat_id, memory)
+        zep_client.memory.add_memory(session_id, memory)
+        print(f"Message saved: {text}")
 
         # Check if bot is mentioned
         if context.bot.username in text:
             logger.info("Bot mentioned, generating response...")
             
-            
             # Retrieve chat history
-            memory_content = zep_client.memory.get_memory(chat_id)
-            messages = memory_content.messages if memory_content else []
-            logger.info(f"Number of messages in chat history: {len(messages)}")
-            chat_history = "\n".join([f"{m.role}: {m.content}" for m in messages])
+            try:
+                messages = await zep_client.message.aget_session_messages(session_id)
+                logger.info(f"Number of messages in chat history: {len(messages)}")
+                chat_history = "\n".join([f"{m.role}: {m.content}" for m in messages])
+            except NotFoundError:
+                logger.info("Session not found, starting a new conversation")
+                chat_history = ""
 
             # Prepare messages for GPT-3.5-turbo
             gpt_messages = [
@@ -81,23 +153,21 @@ async def handle_message(update: Update, context):
 
             # Save bot's response to Zep memory
             bot_memory = Memory(
-                messages=[
-                    Message(
-                        role="assistant",
-                        content=reply_text,
-                        metadata={"user_id": str(context.bot.id)}
-                    )
-                ]
+                    messages=[Message(role="assistant", content=reply_text)],
+                    metadata={"session_id": session_id}
+                    # Message(
+                    #     role="assistant",
+                    #     content=reply_text,
+                    #     metadata={"user_id": str(context.bot.id)}
+                    # )
             )
-            zep_client.memory.add_memory(chat_id, bot_memory)
+            zep_client.memory.add_memory(session_id, bot_memory)
         else:
             logger.info("Bot not mentioned, no response generated.")
 
     except Exception as e:
         logger.error(f"Error in handle_message: {str(e)}")
         logger.error(traceback.format_exc())
-
-
 
 async def error_handler(update: Update, context):
     logger.error(msg="Exception while handling an update:", exc_info=context.error)
