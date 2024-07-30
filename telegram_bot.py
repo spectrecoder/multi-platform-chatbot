@@ -11,7 +11,7 @@ from zep_python.memory import Memory, Message
 # Load environment variables
 load_dotenv()
 
-# Set up logging
+# # Set up logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,6 @@ zep_client = ZepClient(base_url=ZEP_API_URL, api_key=ZEP_API_KEY)
 
 async def start(update: Update, context):
     await update.message.reply_text('Hello! I am your AI assistant. Mention me to ask questions.')
-
 
 async def handle_message(update: Update, context):
     try:
@@ -54,9 +53,12 @@ async def handle_message(update: Update, context):
         # Check if bot is mentioned
         if context.bot.username in text:
             logger.info("Bot mentioned, generating response...")
+            
+            
             # Retrieve chat history
             memory_content = zep_client.memory.get_memory(chat_id)
             messages = memory_content.messages if memory_content else []
+            logger.info(f"Number of messages in chat history: {len(messages)}")
             chat_history = "\n".join([f"{m.role}: {m.content}" for m in messages])
 
             # Prepare messages for GPT-3.5-turbo
