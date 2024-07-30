@@ -55,7 +55,8 @@ async def handle_message(update: Update, context):
         if context.bot.username in text:
             logger.info("Bot mentioned, generating response...")
             # Retrieve chat history
-            messages = await zep_client.memory.get_messages(chat_id, limit=10)  # Adjust limit as needed
+            memory_content = zep_client.memory.get_memory(chat_id)
+            messages = memory_content.messages if memory_content else []
             chat_history = "\n".join([f"{m.role}: {m.content}" for m in messages])
 
             # Prepare messages for GPT-3.5-turbo
@@ -66,7 +67,7 @@ async def handle_message(update: Update, context):
 
             # Generate response using GPT-3.5-turbo
             response = await openai.ChatCompletion.acreate(
-                model="gpt-3.5-turbo",
+                model="gpt-4o-mini",
                 messages=gpt_messages
             )
 
