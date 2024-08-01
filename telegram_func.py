@@ -32,6 +32,132 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 openai.api_key = OPENAI_API_KEY
 zep_client = ZepClient(base_url=ZEP_API_URL, api_key=ZEP_API_KEY)
 
+
+
+
+# Memory and Summarization
+MAX_MESSAGES_BEFORE_SUMMARY = 75  # Number of messages before triggering a summary
+MAX_CHARS_BEFORE_SUMMARY = 12000  # Total character count before triggering a summary
+SUMMARY_WORD_LIMIT = 200  # Maximum word count for generated summaries
+SUMMARY_MAX_AGE_HOURS = 24  # Maximum age of a summary before it's updated, regardless of message count
+
+# Context Retrieval
+RELEVANCE_THRESHOLD = 0.5  # Minimum relevance score for including messages/summaries
+INITIAL_SUMMARY_PERCENTAGE = 0.9  # Starting percentage of messages to include from each summary
+SUMMARY_PERCENTAGE_REDUCTION = 0.1  # Reduction in percentage for each successive summary
+MIN_SUMMARY_PERCENTAGE = 0.5  # Minimum percentage of messages to include from a summary
+MAX_CONTEXT_TOKENS = 3000  # Maximum number of tokens for the entire context
+SUMMARY_CONTEXT_PERCENTAGE = 0.7  # Percentage of context dedicated to summary-related messages
+
+# Model Selection
+SUMMARIZATION_MODEL = "gpt-4o-mini"  # Model to use for generating summaries
+RESPONSE_GENERATION_MODEL = "gpt-4o-mini"  # Model to use for generating bot responses
+EMBEDDING_MODEL = "text-embedding-ada-002"  # Model to use for creating embeddings
+
+# Search and Ranking
+SEARCH_RESULT_LIMIT = 100  # Maximum number of results to retrieve from memory search
+MMR_LAMBDA = 0.5  # Lambda parameter for MMR reranking
+
+# Discord Bot Settings
+
+
+# Summarization Process
+SUMMARY_STYLE = "concise"  # Options: "concise", "detailed", "bullet-points"
+SUMMARY_FOCUS = "key_points"  # Options: "key_points", "chronological", "topic_based"
+SUMMARY_SENTIMENT = False  # Include sentiment analysis in summaries
+SUMMARY_ENTITIES = True  # Highlight key entities or names in summaries
+
+# Bot Response Customization
+RESPONSE_LENGTH = "medium"  # Options: "short", "medium", "long"
+RESPONSE_STYLE = "casual"  # Options: "formal", "casual", "humorous"
+RESPONSE_COMPLEXITY = "moderate"  # Options: "simple", "moderate", "advanced"
+RESPONSE_FORMATTING = True  # Enable use of markdown, bullet points, etc.
+RESPONSE_CITATIONS = False  # Include citations or references to source messages
+
+# Similarity Metrics
+SIMILARITY_METRIC = "cosine"  # Options: "cosine", "euclidean", "jaccard", "levenshtein"
+VECTOR_NORMALIZATION = True  # Enable normalization of vectors before similarity calculation
+SIMILARITY_WEIGHTING = None  # Apply custom weighting to different parts of the embedding
+CONTEXTUAL_SIMILARITY = False  # Consider surrounding messages when calculating similarity
+
+# Rate Limiting and Cooldown
+RATE_LIMIT_MESSAGES = 30  # Maximum number of messages per user per minute
+RATE_LIMIT_COMMANDS = 20  # Maximum number of commands per user per hour
+COOLDOWN_DURATION = 5  # Seconds a user must wait between using specific commands
+BURST_ALLOWANCE = 5  # Number of rapid requests allowed before rate limiting kicks in
+RATE_LIMIT_RESPONSE = "You're doing that too much. Please wait a moment and try again."
+
+# Context Retention
+CONTEXT_RETENTION_MESSAGES = 10  # Number of previous messages to retain for context
+CONTEXT_RETENTION_TIME = 30  # Minutes to retain context
+CONTEXT_RELEVANCE_DECAY = 0.9  # Factor by which to reduce relevance of older context
+TOPIC_CHANGE_THRESHOLD = 0.3  # Sensitivity for detecting a change in conversation topic
+MULTI_TURN_MAX_TURNS = 5  # Maximum number of turns to consider in a single conversation
+
+# Error Handling and Fallback
+ERROR_RETRY_ATTEMPTS = 3  # Number of times to retry failed API calls
+FALLBACK_RESPONSE = "I'm having trouble processing that right now. Could you try rephrasing your request?"
+ERROR_LOGGING_LEVEL = "detailed"  # Options: "minimal", "detailed"
+
+# Performance Optimization
+CACHE_DURATION = 3600  # Seconds to cache embeddings or frequent queries
+BATCH_SIZE = 10  # Number of items to process in a single batch for efficiency
+ASYNC_PROCESSING = True  # Enable asynchronous processing of non-critical tasks
+
+# Integration with External Services
+ENABLE_WEATHER_API = False  # Toggle integration with weather service
+ENABLE_NEWS_API = False  # Toggle integration with news service
+API_TIMEOUT = 5  # Maximum wait time for external API responses in seconds
+
+class PostgresSessionStorage:
+    def __init__(self):
+        self.pool: Pool = None
+
+    async def initialize(self):
+        self.pool = await asyncpg.create_pool(
+            host=PG_HOST,
+            port=PG_PORT,
+            user=PG_USER,
+            password=PG_PASSWORD,
+            database=PG_DATABASE
+        )
+        
+        # Create the sessions table if it doesn't exist
+        async with self.pool.acquire() as conn:
+            await conn.execute('''
+                CREATE TABLE IF NOT EXISTS sessions (
+                    chat_id BIGINT PRIMARY KEY,
+                    session_id UUID NOT NULL
+                )
+            ''')
+
+    async def get_session_id(self, chat_id: int) -> str:
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow(
+                'SELECT session_id FROM sessions WHERE chat_id = $1',
+                chat_id
+            )
+            if row:
+                return str(row['session_id'])
+            
+            # If no session exists, create a new one
+            session_id = str(uuid.uuid4())
+            await conn.execute(
+                'INSERT INTO sessions (chat_id, session_id) VALUES ($1, $2)',
+                chat_id, session_id
+            )
+            return session_id
+
+    async def close(self):
+        await self.pool.close()
+
+session_storage = PostgresSessionStorage()
+
+
+
+
+
+
 async def start(update: Update, context):
     await update.message.reply_text('Hello! I am your AI assistant. Mention me to ask questions. Use /search <keyword> to search chat logs.')
 
