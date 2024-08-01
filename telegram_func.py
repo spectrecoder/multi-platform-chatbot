@@ -58,7 +58,7 @@ EMBEDDING_MODEL = "text-embedding-ada-002"  # Model to use for creating embeddin
 SEARCH_RESULT_LIMIT = 100  # Maximum number of results to retrieve from memory search
 MMR_LAMBDA = 0.5  # Lambda parameter for MMR reranking
 
-# Discord Bot Settings
+
 
 
 # Summarization Process
