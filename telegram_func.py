@@ -3,11 +3,14 @@ import os
 from dotenv import load_dotenv
 import traceback
 from telegram import Update
+from telegram.constants import ChatAction
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
+from telegram.error import BadRequest
 import openai
 from zep_python import ZepClient
 from zep_python.memory import Memory, Message
 import uuid
+import asyncio
 
 # Load environment variables
 load_dotenv()
@@ -28,6 +31,27 @@ zep_client = ZepClient(base_url=ZEP_API_URL, api_key=ZEP_API_KEY)
 
 async def start(update: Update, context):
     await update.message.reply_text('Hello! I am your AI assistant. Mention me to ask questions.')
+
+async def send_typing_periodically(context, chat_id):
+    while True:
+        await context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
+        await asyncio.sleep(4)
+
+async def thinking_animation(message: Message):
+    text = "Thinking"
+    dots = 0
+    while True:
+        try:
+            dots = (dots % 3) + 1  # Cycle through 1, 2, 3 dots
+            await message.edit_text(f"{text}{'.' * dots}")
+            await asyncio.sleep(0.01)  # Wait for 0.1 seconds before the next update
+        except BadRequest as e:
+            if "Message is not modified" in str(e):
+                continue  # If the message didn't change, just continue
+            else:
+                break  # If there's another kind of error, stop the animation
+        except Exception:
+            break  # If any other exception occurs, stop the animation
 
 
 
@@ -56,6 +80,10 @@ async def handle_message(update: Update, context):
         if context.bot.username in text:
             logger.info("Bot mentioned, generating response...")
             
+            thinking_message = await update.message.reply_text("Thinking...")
+
+            thinking_task = asyncio.create_task(thinking_animation(thinking_message))
+
             # Retrieve chat history
             try:
                 messages = await zep_client.message.aget_session_messages(session_id)
@@ -70,7 +98,7 @@ async def handle_message(update: Update, context):
                 {"role": "user", "content": f"Chat history:\n{chat_history}\n\nUser: {text}"}
             ]
 
-            # Generate response using GPT-3.5-turbo
+        
             response = await openai.ChatCompletion.acreate(
                 model="gpt-4o-mini",
                 messages=gpt_messages
@@ -80,17 +108,14 @@ async def handle_message(update: Update, context):
             logger.info(f"Generated response: {reply_text}")
 
             # Send the generated response
-            await update.message.reply_text(reply_text)
-
+            thinking_task.cancel()
+            await thinking_message.edit_text(reply_text)
+           
             # Save bot's response to Zep memory
             bot_memory = Memory(
                     messages=[Message(role="assistant", content=reply_text)],
                     metadata={"session_id": session_id}
-                    # Message(
-                    #     role="assistant",
-                    #     content=reply_text,
-                    #     metadata={"user_id": str(context.bot.id)}
-                    # )
+                   
             )
             zep_client.memory.add_memory(session_id, bot_memory)
         else:
