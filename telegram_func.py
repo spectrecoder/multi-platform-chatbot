@@ -7,10 +7,13 @@ from telegram.constants import ChatAction
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from telegram.error import BadRequest
 import openai
-from zep_python import ZepClient
+from zep_python import ZepClient, MemorySearchPayload
 from zep_python.memory import Memory, Message
 import uuid
 import asyncio
+from zep_python.exceptions import NotFoundError
+import concurrent.futures
+import re
 
 # Load environment variables
 load_dotenv()
@@ -30,7 +33,7 @@ openai.api_key = OPENAI_API_KEY
 zep_client = ZepClient(base_url=ZEP_API_URL, api_key=ZEP_API_KEY)
 
 async def start(update: Update, context):
-    await update.message.reply_text('Hello! I am your AI assistant. Mention me to ask questions.')
+    await update.message.reply_text('Hello! I am your AI assistant. Mention me to ask questions. Use /search <keyword> to search chat logs.')
 
 async def send_typing_periodically(context, chat_id):
     while True:
@@ -125,6 +128,52 @@ async def handle_message(update: Update, context):
         logger.error(f"Error in handle_message: {str(e)}")
         logger.error(traceback.format_exc())
 
+
+
+async def search_chat(update: Update, context):
+    if not context.args:
+        await update.message.reply_text("Please provide a search keyword. Usage: /search <keyword>")
+        return
+
+    keyword = " ".join(context.args)
+    chat_id = str(update.message.chat_id)
+    session_id = f"telegram_chat_{chat_id}"
+
+    search_payload = MemorySearchPayload(
+        text=keyword,
+        search_scope="messages",
+        search_type="mmr", 
+        mmr_lambda=0.5
+    )
+
+    try:
+        search_message = await update.message.reply_text("Searching...")
+        search_results = await zep_client.memory.asearch_memory(session_id, search_payload, limit=5)
+        
+        if search_results:
+            response = "Search results:\n\n"
+            for result in search_results:
+                if result.message:
+                    content = result.message.get('content', 'No content available')
+                    # Highlight the keyword by making it uppercase and surrounding it with characters
+                    highlighted_content = re.sub(
+                        f'({re.escape(keyword)})',
+                        lambda m: f"<<{m.group(1).upper()}>>",
+                        content,
+                        flags=re.IGNORECASE
+                    )
+                    response += f"{highlighted_content}\n\n"
+        else:
+            response = "No results found for the given keyword."
+
+        await search_message.edit_text(response)
+    except Exception as e:
+        logger.error(f"Error in search_chat: {str(e)}")
+        await update.message.reply_text("An error occurred while searching. Please try again later.")
+
+
+
+
 async def error_handler(update: Update, context):
     logger.error(msg="Exception while handling an update:", exc_info=context.error)
 
@@ -132,9 +181,10 @@ def main():
     # Create the Application and pass it your bot's token
     application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
-    # Add handlers
+
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    application.add_handler(CommandHandler("search", search_chat)) 
 
     # Add error handler
     application.add_error_handler(error_handler)
