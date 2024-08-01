@@ -65,7 +65,6 @@ async def handle_message(update: Update, context):
                 logger.info("Session not found, starting a new conversation")
                 chat_history = ""
 
-            # Prepare messages for GPT-3.5-turbo
             gpt_messages = [
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": f"Chat history:\n{chat_history}\n\nUser: {text}"}

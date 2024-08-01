@@ -14,7 +14,7 @@ class MyHandler(FileSystemEventHandler):
             self.restart_bot()
 
     def start_bot(self):
-        self.process = subprocess.Popen(['/New Work/mutil-platform-chatbot/venv/Scripts/python.exe', 'telegram_bot.py'])
+        self.process = subprocess.Popen(['/New Work/mutil-platform-chatbot/venv/Scripts/python.exe', 'telegram_func.py'])
 
     def restart_bot(self):
         if self.process:
