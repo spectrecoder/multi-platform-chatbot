@@ -14,6 +14,7 @@ import asyncio
 from zep_python.exceptions import NotFoundError
 import concurrent.futures
 import re
+import tiktoken
 
 # Load environment variables
 load_dotenv()
@@ -40,6 +41,7 @@ MAX_MESSAGES_BEFORE_SUMMARY = 75  # Number of messages before triggering a summa
 MAX_CHARS_BEFORE_SUMMARY = 12000  # Total character count before triggering a summary
 SUMMARY_WORD_LIMIT = 200  # Maximum word count for generated summaries
 SUMMARY_MAX_AGE_HOURS = 24  # Maximum age of a summary before it's updated, regardless of message count
+MAX_TOKENS_FOR_SUMMARY = 3000
 
 # Context Retrieval
 RELEVANCE_THRESHOLD = 0.5  # Minimum relevance score for including messages/summaries
@@ -299,6 +301,48 @@ async def search_chat(update: Update, context):
 
 
 
+def count_tokens(text: str) -> int:
+    encoding = tiktoken.encoding_for_model(SUMMARIZATION_MODEL)
+    return len(encoding.encode(text))
+
+async def summarize_chat(update: Update, context):
+    chat_id = str(update.message.chat_id)
+    session_id = f"telegram_chat_{chat_id}"
+
+    try:
+        # Retrieve recent messages
+        messages = await zep_client.message.aget_session_messages(session_id)
+        
+        # Prepare the chat history for summarization
+        chat_history = "\n".join([f"{m.role}: {m.content}" for m in messages])
+        
+        # Truncate the chat history if it's too long
+        while count_tokens(chat_history) > MAX_TOKENS_FOR_SUMMARY:
+            messages = messages[1:]  # Remove the oldest message
+            chat_history = "\n".join([f"{m.role}: {m.content}" for m in messages])
+
+        # Generate summary
+        summary_message = await update.message.reply_text("Generating summary...")
+
+        response = await openai.ChatCompletion.acreate(
+            model=SUMMARIZATION_MODEL,
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant tasked with summarizing conversations. Provide a concise summary of the key points discussed."},
+                {"role": "user", "content": f"Please summarize the following conversation:\n\n{chat_history}"}
+            ]
+        )
+
+        summary = response.choices[0].message.content.strip()
+
+        # Send the summary
+        await summary_message.edit_text(f"Summary of recent conversation:\n\n{summary}")
+
+    except Exception as e:
+        logger.error(f"Error in summarize_chat: {str(e)}")
+        await update.message.reply_text("An error occurred while generating the summary. Please try again later.")
+
+
+
 
 async def error_handler(update: Update, context):
     logger.error(msg="Exception while handling an update:", exc_info=context.error)
@@ -311,6 +355,7 @@ def main():
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(CommandHandler("search", search_chat)) 
+    application.add_handler(CommandHandler("summarize", summarize_chat))
 
     # Add error handler
     application.add_error_handler(error_handler)
