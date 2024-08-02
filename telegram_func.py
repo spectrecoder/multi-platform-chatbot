@@ -355,7 +355,7 @@ def main():
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(CommandHandler("search", search_chat)) 
-    application.add_handler(CommandHandler("summarize", summarize_chat))
+    # application.add_handler(CommandHandler("summarize", summarize_chat))
 
     # Add error handler
     application.add_error_handler(error_handler)
