@@ -206,7 +206,7 @@ async def handle_message(update: Update, context):
         logger.debug(f"Adding memory: {memory}")
         zep_client.memory.add_memory(session_id, memory)
         print(f"Message saved: {text}")
-
+        print(f"Message saved: {message}")
         # Check if bot is mentioned
         if context.bot.username in text:
             logger.info("Bot mentioned, generating response...")
