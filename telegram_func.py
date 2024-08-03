@@ -15,6 +15,8 @@ from zep_python.exceptions import NotFoundError
 import concurrent.futures
 import re
 import tiktoken
+from datetime import datetime
+from typing import List
 
 # Load environment variables
 load_dotenv()
@@ -192,6 +194,7 @@ async def handle_message(update: Update, context):
         chat_id = str(message.chat_id)
         user_id = str(message.from_user.id)
         text = message.text
+        timestamp = message.date
 
         logger.info(f"Received message: {text}")
 
@@ -200,7 +203,7 @@ async def handle_message(update: Update, context):
 
         # Save message to Zep memory
         memory = Memory(
-            messages=[Message(role="user", content=f"{user_id}: {text}")],
+            messages=[Message(role="user", content=f"{user_id} ({timestamp}): {text}", timestamp=timestamp)],
             metadata={"session_id": session_id}
         )
         logger.debug(f"Adding memory: {memory}")
@@ -242,9 +245,10 @@ async def handle_message(update: Update, context):
             thinking_task.cancel()
             await thinking_message.edit_text(reply_text)
            
+            current_timestamp = datetime.utcnow()
             # Save bot's response to Zep memory
             bot_memory = Memory(
-                    messages=[Message(role="assistant", content=reply_text)],
+                   messages=[Message(role="assistant", content=f"({current_timestamp}): {reply_text}", timestamp=current_timestamp)],
                     metadata={"session_id": session_id}
                    
             )
