@@ -11,5 +11,4 @@ watchdog
 python-telegram-bot
 asyncio
 tiktoken
-subprocess
 
