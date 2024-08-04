@@ -11,4 +11,6 @@ watchdog
 python-telegram-bot
 asyncio
 tiktoken
+slack_sdk
+slack_bolt
 
