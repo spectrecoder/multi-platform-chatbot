@@ -208,11 +208,11 @@ async def handle_message(update: Update, context):
         )
         logger.debug(f"Adding memory: {memory}")
         zep_client.memory.add_memory(session_id, memory)
-        print(f"Message saved: {text}")
-        print(f"Message saved: {message}")
+        # print(f"Message saved: {text}")
+        # print(f"Message saved: {message}")
         # Check if bot is mentioned
         if context.bot.username in text:
-            logger.info("Bot mentioned, generating response...")
+            # logger.info("Bot mentioned, generating response...")
             
             thinking_message = await update.message.reply_text("Thinking...")
 
@@ -221,7 +221,7 @@ async def handle_message(update: Update, context):
             # Retrieve chat history
             try:
                 messages = await zep_client.message.aget_session_messages(session_id)
-                logger.info(f"Number of messages in chat history: {len(messages)}")
+                # logger.info(f"Number of messages in chat history: {len(messages)}")
                 chat_history = "\n".join([f"{m.role}: {m.content}" for m in messages])
             except NotFoundError:
                 logger.info("Session not found, starting a new conversation")
@@ -239,7 +239,7 @@ async def handle_message(update: Update, context):
             )
 
             reply_text = response.choices[0].message.content.strip()
-            logger.info(f"Generated response: {reply_text}")
+            # logger.info(f"Generated response: {reply_text}")
 
             # Send the generated response
             thinking_task.cancel()

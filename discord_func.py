@@ -229,7 +229,7 @@ async def on_message(message):
             metadata={"session_id": session_id}
         )
         zep_client.memory.add_memory(session_id, memory)
-        print(f"Message saved: {content}")
+        # print(f"Message saved: {content}")
 
         # Increment the message counter for this session
         if session_id not in message_counters:
@@ -267,7 +267,7 @@ async def on_message(message):
                 metadata={"session_id": session_id}
             )
             zep_client.memory.add_memory(session_id, memory)
-            print(f"Bot response saved: {response}")
+            # print(f"Bot response saved: {response}")
         except Exception as e:
             print(f"Error saving bot response: {e}")
 
@@ -282,7 +282,7 @@ async def generate_response(channel_id, user_message):
         try:
             historical_messages = await zep_client.message.aget_session_messages(
                 session_id)
-            print(len(historical_messages))
+            # print(len(historical_messages))
         except Exception as e:
             print(f"Error retrieving historical messages: {e}")
             historical_messages = []
