@@ -13,4 +13,8 @@ asyncio
 tiktoken
 slack_sdk
 slack_bolt
+langchain
+slack-sdk 
+slack-bolt 
+Flask
 
