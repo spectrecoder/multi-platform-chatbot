@@ -12,7 +12,7 @@ SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
 app = App(token=SLACK_BOT_TOKEN)
 
-# Set up OpenAI
+
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Event listener for messages
@@ -35,7 +35,7 @@ def handle_message(message, say):
     bot_reply = response.choices[0].text.strip()
     say(bot_reply)
 
-# Start the app
+
 if __name__ == "__main__":
     handler = SocketModeHandler(app, SLACK_APP_TOKEN)
     handler.start()
