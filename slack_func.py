@@ -13,14 +13,14 @@ load_dotenv(find_dotenv())
 
 slack_bot_token = os.environ["SLACK_BOT_TOKEN"]
 openai_api_key = os.environ["OPENAI_API_KEY"]
-signing_secret = os.environ["SIGNING_SECRET"]
+signing_secret = os.environ["SLACK_SIGNING_SECRET"]
 
 app = App(token=slack_bot_token, signing_secret=signing_secret)
 
 flask_app = Flask(__name__)
 handler = SlackRequestHandler(app)
 
-CHATAI = ChatOpenAI(temperature=0.9,model_name='gpt-3.5-turbo',max_tokens=1500, openai_api_key=openai_api_key)
+CHATAI = ChatOpenAI(temperature=0.9,model_name='gpt-4o-mini',max_tokens=1500, openai_api_key=openai_api_key)
 
 template = """Assistant is a large language model trained by OpenAI.
 
