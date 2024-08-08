@@ -63,6 +63,8 @@ def handle_mention(event, say):
     # Generate response
     response = generate_response(text, history)
 
+    # response = generate_response(text, history)
+
  
     try:
         
