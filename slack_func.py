@@ -70,7 +70,7 @@ def handle_mention(event, say):
     except Exception as e:
         print(f"Error deleting typing message: {e}")
 
-    # Send the response
+   
     say(text=response)
 
 
