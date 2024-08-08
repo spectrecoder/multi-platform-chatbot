@@ -8,6 +8,7 @@ from zep_python import ZepClient
 import threading
 import time
 
+# import time
 # Load environment variables
 load_dotenv()
 
@@ -24,7 +25,7 @@ zep_client = ZepClient(base_url=os.environ["ZEP_API_URL"], api_key=os.environ["Z
 flask_app = Flask(__name__)
 handler = SlackRequestHandler(app)
 
-# Function to get chat history from Zep
+
 def get_chat_history(channel_id):
     # Implement logic to retrieve chat history from Zep
     # This is a placeholder and needs to be implemented based on Zep's API
@@ -53,7 +54,7 @@ def handle_mention(event, say):
     user_id = event["user"]
     text = event["text"]
 
-    # Start typing effect
+ 
     threading.Thread(target=typing_effect, args=(channel_id,)).start()
 
     # Get chat history
