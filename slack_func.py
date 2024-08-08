@@ -57,18 +57,20 @@ def handle_mention(event, say):
  
     threading.Thread(target=typing_effect, args=(channel_id,)).start()
 
-    # Get chat history
+
     history = get_chat_history(channel_id)
 
     # Generate response
     response = generate_response(text, history)
 
-    # Remove typing indicator
+ 
     try:
-        # Try to delete the "Bot is typing..." message
+        
         app.client.chat_delete(channel=channel_id, ts=event["ts"])
     except Exception as e:
         print(f"Error deleting typing message: {e}")
+    # except Exception as e:
+    #     print(f"Error deleting typing message: {e}")
 
    
     say(text=response)
