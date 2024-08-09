@@ -7,7 +7,6 @@ class MyHandler(FileSystemEventHandler):
     def __init__(self):
         self.process = None
         self.start_bot()
-        # self.start_bot()
 
     def on_modified(self, event):
         if event.src_path.endswith('.py'):
@@ -20,7 +19,6 @@ class MyHandler(FileSystemEventHandler):
     def restart_bot(self):
         if self.process:
             self.process.terminate()
-            # self.process.terminate()
             self.process.wait()
         self.start_bot()
 
