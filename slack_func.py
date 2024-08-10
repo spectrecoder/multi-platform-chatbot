@@ -60,10 +60,9 @@ def handle_mention(event, say):
 
     history = get_chat_history(channel_id)
 
-    # Generate response
+ 
     response = generate_response(text, history)
 
-    # response = generate_response(text, history)
 
  
     try:
@@ -71,8 +70,6 @@ def handle_mention(event, say):
         app.client.chat_delete(channel=channel_id, ts=event["ts"])
     except Exception as e:
         print(f"Error deleting typing message: {e}")
-    # except Exception as e:
-    #     print(f"Error deleting typing message: {e}")
 
    
     say(text=response)
