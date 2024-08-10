@@ -26,6 +26,20 @@ flask_app = Flask(__name__)
 handler = SlackRequestHandler(app)
 
 
+
+# openai.api_key = os.environ["OPENAI_API_KEY"]
+
+# # Initialize Zep client
+# zep_client = ZepClient(base_url=os.environ["ZEP_API_URL"], api_key=os.environ["ZEP_API_KEY"])
+
+# # Initialize Flask app
+# flask_app = Flask(__name__)
+# handler = SlackRequestHandler(app)
+
+
+
+
+
 def get_chat_history(channel_id):
     # Implement logic to retrieve chat history from Zep
     # This is a placeholder and needs to be implemented based on Zep's API
@@ -63,8 +77,6 @@ def handle_mention(event, say):
  
     response = generate_response(text, history)
 
-
- 
     try:
         
         app.client.chat_delete(channel=channel_id, ts=event["ts"])
@@ -84,3 +96,13 @@ def slack_events():
 if __name__ == "__main__":
     print("Starting the Slack bot server...")
     flask_app.run(port=5001)
+
+
+# @flask_app.route("/slack/events", methods=["POST"])
+# def slack_events():
+#     return handler.handle(request)
+
+# # Main execution
+# if __name__ == "__main__":
+#     print("Starting the Slack bot server...")
+#     flask_app.run(port=5001)
