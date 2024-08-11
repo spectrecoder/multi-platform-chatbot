@@ -55,7 +55,7 @@ def handle_message(event, say):
         text = event.get("text", "")
         timestamp = datetime.fromtimestamp(float(event["ts"]))
 
-        logger.info(f"Received message: {text}")
+        logger.info(f"Received message in channel {channel_id} from user {user_id}: {text}")
 
         # Generate a session_id based on channel_id
         session_id = f"slack_channel_{channel_id}"
@@ -67,22 +67,18 @@ def handle_message(event, say):
         )
         add_memory(session_id, user_memory)
 
+        # Check if the bot is mentioned
+        if app.client.auth_test()["user_id"] in text:
+            handle_bot_mention(event, say, session_id)
+
     except Exception as e:
         logger.error(f"Error in handle_message: {str(e)}")
         logger.error(traceback.format_exc())
 
-@app.event("app_mention")
-def handle_app_mention(event, say):
+def handle_bot_mention(event, say, session_id):
     try:
         channel_id = event["channel"]
-        user_id = event.get("user", "Unknown")
-        text = event.get("text", "")
-        timestamp = datetime.fromtimestamp(float(event["ts"]))
-
-        logger.info(f"Received app mention: {text}")
-
-        # Generate a session_id based on channel_id
-        session_id = f"slack_channel_{channel_id}"
+        text = event["text"]
 
         thinking_message = say("Thinking...")
 
@@ -118,7 +114,7 @@ def handle_app_mention(event, say):
         add_memory(session_id, bot_memory)
 
     except Exception as e:
-        logger.error(f"Error in handle_app_mention: {str(e)}")
+        logger.error(f"Error in handle_bot_mention: {str(e)}")
         logger.error(traceback.format_exc())
         say("An error occurred while processing your request. Please try again later.")
 
