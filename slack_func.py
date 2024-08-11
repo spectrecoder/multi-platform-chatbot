@@ -31,7 +31,7 @@ flask_app = Flask(__name__)
 handler = SlackRequestHandler(app)
 
 # Constants
-RESPONSE_GENERATION_MODEL = "gpt-4-0613"
+RESPONSE_GENERATION_MODEL = "gpt-4o-mini"
 
 def get_session_messages(session_id: str):
     try:
@@ -105,7 +105,7 @@ def handle_bot_mention(event, say, session_id):
             text=reply_text
         )
 
-        current_timestamp = datetime.utcnow()
+        current_timestamp = datetime.utcnow().strftime("%Y.%m.%d")
         # Save bot's response to Zep memory
         bot_memory = Memory(
             messages=[Message(role="assistant", content=f"({current_timestamp}): {reply_text}", timestamp=current_timestamp)],
