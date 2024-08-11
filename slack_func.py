@@ -9,7 +9,6 @@ from zep_python.memory import Memory, Message
 from datetime import datetime
 import logging
 import traceback
-import asyncio
 
 # Load environment variables
 load_dotenv()
@@ -32,7 +31,7 @@ flask_app = Flask(__name__)
 handler = SlackRequestHandler(app)
 
 # Constants
-RESPONSE_GENERATION_MODEL = "gpt-4o-mini"
+RESPONSE_GENERATION_MODEL = "gpt-4-0613"
 
 def get_session_messages(session_id: str):
     try:
@@ -48,19 +47,18 @@ def add_memory(session_id: str, memory: Memory):
     except Exception as e:
         logger.error(f"Error adding memory: {str(e)}")
 
-@app.event("app_mention")
-def handle_mention(event, say):
+@app.event("message")
+def handle_message(event, say):
     try:
         channel_id = event["channel"]
-        user_id = event["user"]
-        text = event["text"]
+        user_id = event.get("user", "Unknown")
+        text = event.get("text", "")
         timestamp = datetime.fromtimestamp(float(event["ts"]))
 
         logger.info(f"Received message: {text}")
 
         # Generate a session_id based on channel_id
         session_id = f"slack_channel_{channel_id}"
-        print(f"slack_channel_{channel_id}")
 
         # Save message to Zep memory
         user_memory = Memory(
@@ -69,12 +67,28 @@ def handle_mention(event, say):
         )
         add_memory(session_id, user_memory)
 
+    except Exception as e:
+        logger.error(f"Error in handle_message: {str(e)}")
+        logger.error(traceback.format_exc())
+
+@app.event("app_mention")
+def handle_app_mention(event, say):
+    try:
+        channel_id = event["channel"]
+        user_id = event.get("user", "Unknown")
+        text = event.get("text", "")
+        timestamp = datetime.fromtimestamp(float(event["ts"]))
+
+        logger.info(f"Received app mention: {text}")
+
+        # Generate a session_id based on channel_id
+        session_id = f"slack_channel_{channel_id}"
+
         thinking_message = say("Thinking...")
 
         # Retrieve chat history
         messages = get_session_messages(session_id)
         chat_history = "\n".join([f"{m.role}: {m.content}" for m in messages])
-        print(f"chathistory=============={chat_history}")
 
         gpt_messages = [
             {"role": "system", "content": "You are a helpful Slack assistant."},
@@ -104,7 +118,7 @@ def handle_mention(event, say):
         add_memory(session_id, bot_memory)
 
     except Exception as e:
-        logger.error(f"Error in handle_mention: {str(e)}")
+        logger.error(f"Error in handle_app_mention: {str(e)}")
         logger.error(traceback.format_exc())
         say("An error occurred while processing your request. Please try again later.")
 
