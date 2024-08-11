@@ -53,7 +53,7 @@ def handle_message(event, say):
         channel_id = event["channel"]
         user_id = event.get("user", "Unknown")
         text = event.get("text", "")
-        timestamp = datetime.fromtimestamp(float(event["ts"]))
+        timestamp = datetime.fromtimestamp(float(event["ts"])).strftime("%Y.%m.%d")
 
         logger.info(f"Received message in channel {channel_id} from user {user_id}: {text}")
 
@@ -74,6 +74,7 @@ def handle_message(event, say):
     except Exception as e:
         logger.error(f"Error in handle_message: {str(e)}")
         logger.error(traceback.format_exc())
+
 
 def handle_bot_mention(event, say, session_id):
     try:

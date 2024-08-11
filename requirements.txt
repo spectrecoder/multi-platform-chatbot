@@ -13,6 +13,5 @@ asyncio
 tiktoken
 slack_sdk
 slack_bolt
-langchain
 Flask
 
