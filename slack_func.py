@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import openai
 from zep_python import ZepClient, MemorySearchPayload
 from zep_python.memory import Memory, Message
@@ -158,6 +158,11 @@ def search_chat(ack, respond, command):
 # Flask route for Slack events
 @flask_app.route("/slack/events", methods=["POST"])
 def slack_events():
+    # Check if this is a challenge request
+    if "challenge" in request.json:
+        return jsonify({"challenge": request.json["challenge"]})
+    
+    # If not a challenge, pass to the Slack handler
     return handler.handle(request)
 
 # Main execution
