@@ -14,4 +14,7 @@ tiktoken
 slack_sdk
 slack_bolt
 Flask
+aiohttp
+slack-bolt[async]
+gunicorn
 
