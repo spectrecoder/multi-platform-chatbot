@@ -158,12 +158,30 @@ def search_chat(ack, respond, command):
 # Flask route for Slack events
 @flask_app.route("/slack/events", methods=["POST"])
 def slack_events():
+    # Get the JSON body of the request
+    data = request.json
+
+    # Log the incoming request for debugging
+    logger.info(f"Received request: {data}")
+
     # Check if this is a challenge request
-    if "challenge" in request.json:
-        return jsonify({"challenge": request.json["challenge"]})
+    if data and "type" in data and data["type"] == "url_verification":
+        logger.info("Responding to url_verification challenge")
+        return jsonify({"challenge": data["challenge"]})
     
     # If not a challenge, pass to the Slack handler
     return handler.handle(request)
+
+
+@flask_app.before_request
+def log_request_info():
+    logger.info('Headers: %s', request.headers)
+    logger.info('Body: %s', request.get_data())
+
+@flask_app.after_request
+def log_response_info(response):
+    logger.info('Response: %s', response.get_data())
+    return response
 
 # Main execution
 if __name__ == "__main__":
