@@ -164,5 +164,3 @@ def slack_events():
 if __name__ == "__main__":
     print("Starting the Slack bot server...")
     flask_app.run(port=5001)
-
-
