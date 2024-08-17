@@ -108,6 +108,7 @@ def handle_new_messages():
                 response = send_whapi_request('groups', {'subject': 'Whapi.Cloud Test', 'participants': participants})
                 sender['body'] = f"Group created. Group id: {response.get('group_id')}" if response.get('group_id') else 'Error'
                 endpoint = 'messages/text'
+
             elif command == 'GROUP_TEXT':
                 sender['to'] = os.getenv('GROUP_ID')  # Replace with your group ID
                 sender['body'] = 'Simple text message for the group'
@@ -144,8 +145,3 @@ if __name__ == '__main__':
     port = os.getenv('PORT') or (443 if os.getenv('BOT_URL', '').startswith('https:') else 80)
     app.run(port=port, debug=True)
 
-
-    #  groups_response = send_whapi_request('groups', {'count': 3}, 'GET')
-    #             groups = groups_response.get('groups', [])
-    #             sender['body'] = ',\n '.join(f"{group['id']} - {group['name']}" for group in groups) if groups else 'No groups'
-    #             endpoint = 'messages/text'
