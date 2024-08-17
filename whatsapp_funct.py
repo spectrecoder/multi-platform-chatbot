@@ -143,3 +143,9 @@ if __name__ == '__main__':
     set_hook()
     port = os.getenv('PORT') or (443 if os.getenv('BOT_URL', '').startswith('https:') else 80)
     app.run(port=port, debug=True)
+
+
+    #  groups_response = send_whapi_request('groups', {'count': 3}, 'GET')
+    #             groups = groups_response.get('groups', [])
+    #             sender['body'] = ',\n '.join(f"{group['id']} - {group['name']}" for group in groups) if groups else 'No groups'
+    #             endpoint = 'messages/text'
