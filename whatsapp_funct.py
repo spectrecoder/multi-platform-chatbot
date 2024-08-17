@@ -126,6 +126,7 @@ def handle_new_messages():
             return 'Ok', 200
         response = send_whapi_request(endpoint, sender)
         print(f"Response from Whapi: {response}")
+        # print(f"Response from Whapi: {response}")
         return 'Ok', 200
     
     except Exception as e:
