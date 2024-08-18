@@ -145,3 +145,16 @@ if __name__ == '__main__':
     port = os.getenv('PORT') or (443 if os.getenv('BOT_URL', '').startswith('https:') else 80)
     app.run(port=port, debug=True)
 
+# def set_hook():
+#     if os.getenv('BOT_URL'):
+#         settings = {
+#             'webhooks': [
+#                 {
+#                     'url': os.getenv('BOT_URL'),
+#                     'events': [
+#                         {'type': "messages", 'method': "post"}
+#                     ],
+#                     'mode': "method"
+#                 }
+#             ]
+#         }
