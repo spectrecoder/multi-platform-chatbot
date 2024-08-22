@@ -17,4 +17,5 @@ Flask
 aiohttp
 slack-bolt[async]
 gunicorn
+twilio
 
