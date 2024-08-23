@@ -165,12 +165,3 @@ if __name__ == "__main__":
     print("Starting the Slack bot server...")
     flask_app.run(port=5001)
 
-
-#     @flask_app.route("/slack/events", methods=["POST"])
-# def slack_events():
-#     return handler.handle(request)
-
-# # Main execution
-# if __name__ == "__main__":
-#     print("Starting the Slack bot server...")
-#     flask_app.run(port=5001)
