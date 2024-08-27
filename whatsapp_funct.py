@@ -45,4 +45,12 @@ def wa_reply():
     return str(twilio_response)
 
 
+#  reply=twilio_response.message()
+#     if query.split(" ")[0].lower() in draw_syn:
+#         image_url=generate_image(query)
+#         reply.media(image_url,caption=query)
+#     else:
+#         answer=generate_answer(query)
+#         reply.body(answer)
+#     return str(twilio_response)
 
