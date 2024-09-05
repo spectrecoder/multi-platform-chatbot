@@ -1,13 +1,18 @@
+import os
 import requests
 import openai
 import zep_python as zep
+from dotenv import load_dotenv
 from datetime import datetime
 
-# Configuration
+# Load environment variables from .env file
+load_dotenv()
+
+# Configuration from environment variables
 WAHA_API_BASE_URL = 'https://waha.devlike.pro'
-WAHA_API_KEY = 'your_waha_api_key'  # Replace with your Waha API key
-OPENAI_API_KEY = 'your_openai_api_key'  # Replace with your OpenAI API key
-ZEP_API_BASE_URL = 'http://localhost:8000'  # Zep memory server base URL
+WAHA_API_KEY = os.getenv('WAHA_API_KEY')  # Loaded from .env
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')  # Loaded from .env
+ZEP_API_BASE_URL = os.getenv('ZEP_API_BASE_URL')  # Loaded from .env
 
 # Set OpenAI API key
 openai.api_key = OPENAI_API_KEY
