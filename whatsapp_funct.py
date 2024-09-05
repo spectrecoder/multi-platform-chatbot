@@ -1,19 +1,65 @@
 import requests
-import json
 import openai
+import zep_python as zep
+from datetime import datetime
 
 # Configuration
 WAHA_API_BASE_URL = 'https://waha.devlike.pro'
-WAHA_API_KEY = 'waha_api_key'  # 
-OPENAI_API_KEY = 'openai_api_key'  
+WAHA_API_KEY = 'your_waha_api_key'  # Replace with your Waha API key
+OPENAI_API_KEY = 'your_openai_api_key'  # Replace with your OpenAI API key
+ZEP_API_BASE_URL = 'http://localhost:8000'  # Zep memory server base URL
 
 # Set OpenAI API key
 openai.api_key = OPENAI_API_KEY
 
-# Function to log messages
-def log_message(message, sender, group_id):
-    with open("group_messages.log", "a") as log_file:
-        log_file.write(f"Group: {group_id}, Sender: {sender}, Message: {message}\n")
+# Initialize Zep client
+zep_client = zep.ZepClient(base_url=ZEP_API_BASE_URL)
+
+# Function to log messages to Zep
+def log_message_to_zep(message, sender, group_id):
+    session_id = group_id  # Use group ID as the session ID
+    
+    # Check if session exists, otherwise create a new one
+    try:
+        session = zep_client.get_session(session_id)
+    except zep.SessionNotFound:
+        # If the session does not exist, create it
+        session = zep.Session(session_id=session_id, metadata={"group_name": group_id})
+        zep_client.add_session(session)
+    
+    # Create a new message object
+    chat_message = zep.Message(
+        role="user",
+        content=message,
+        metadata={
+            "sender": sender,
+            "timestamp": datetime.now().isoformat()
+        }
+    )
+    
+    # Add the message to the session
+    zep_client.add_message(session_id, chat_message)
+    
+    print(f"Logged message to Zep: {message} from {sender} in group {group_id}")
+
+# Function to retrieve chat history from Zep
+def retrieve_chat_history(session_id):
+    try:
+        messages = zep_client.get_messages(session_id)
+        return messages
+    except zep.SessionNotFound:
+        return []
+
+# Function to build a prompt using past messages from Zep
+def build_contextual_prompt(current_message, group_id):
+    history = retrieve_chat_history(group_id)
+    history_content = "\n".join(
+        [f"{msg.metadata['sender']}: {msg.content}" for msg in history if msg.content]
+    )
+    
+    # Combine chat history and current message into one prompt
+    prompt = f"Conversation history:\n{history_content}\n\nUser's latest message:\n{current_message}\n\nReply to the user based on the conversation above."
+    return prompt
 
 # Function to send a message via Waha API
 def send_whatsapp_message(group_id, message):
@@ -29,14 +75,17 @@ def send_whatsapp_message(group_id, message):
     response = requests.post(url, headers=headers, json=data)
     return response.status_code, response.text
 
-# Function to handle message when bot is mentioned
+# Function to handle message when bot is mentioned, with chat log analysis
 def handle_mention(message, group_id):
+    # Build contextual prompt with chat history
+    prompt = build_contextual_prompt(message, group_id)
+    
     # Use OpenAI GPT-4o-mini to generate a reply
     try:
         response = openai.Completion.create(
             engine="gpt-4o-mini",
-            prompt=message,
-            max_tokens=50
+            prompt=prompt,
+            max_tokens=150
         )
         reply = response['choices'][0]['text'].strip()
         return reply
@@ -63,8 +112,8 @@ def process_messages():
                 sender = msg['sender']
                 message = msg['message']
 
-                # Log the message
-                log_message(message, sender, group_id)
+                # Log the message to Zep
+                log_message_to_zep(message, sender, group_id)
 
                 # Check if the bot is mentioned
                 if 'bot_name' in message:  # Replace 'bot_name' with your bot's identifier
