@@ -133,28 +133,3 @@ if __name__ == "__main__":
     process_messages()
 
 
-#     while True:
-#         try:
-#             # Fetch new messages from the group
-#             response = requests.get(url, headers=headers)
-#             messages = response.json()
-
-#             for msg in messages:
-#                 group_id = msg['group_id']
-#                 sender = msg['sender']
-#                 message = msg['message']
-
-#                 # Log the message to Zep
-#                 log_message_to_zep(message, sender, group_id)
-
-#                 # Check if the bot is mentioned
-#                 if 'bot_name' in message:  # Replace 'bot_name' with your bot's identifier
-#                     reply = handle_mention(message, group_id)
-#                     send_whatsapp_message(group_id, reply)
-
-#         except Exception as e:
-#             print(f"Error processing messages: {e}")
-
-# # Start the bot
-# if __name__ == "__main__":
-#     process_messages()
