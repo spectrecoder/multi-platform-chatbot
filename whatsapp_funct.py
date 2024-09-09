@@ -128,9 +128,23 @@ def process_messages():
         except Exception as e:
             print(f"Error processing messages: {e}")
 
-# Start the bot
-if __name__ == "__main__":
-    process_messages()
+# # Start the bot
+# if __name__ == "__main__":
+#     process_messages()
 
+
+#                 log_message_to_zep(message, sender, group_id)
+
+#                 # Check if the bot is mentioned
+#                 if 'bot_name' in message:  # Replace 'bot_name' with your bot's identifier
+#                     reply = handle_mention(message, group_id)
+#                     send_whatsapp_message(group_id, reply)
+
+#         except Exception as e:
+#             print(f"Error processing messages: {e}")
+
+# # Start the bot
+# if __name__ == "__main__":
+#     process_messages()
 
 
