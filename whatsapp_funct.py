@@ -81,23 +81,6 @@ def send_whatsapp_message(group_id, message):
     return response.status_code, response.text
 
 
-
-
-#     # Function to send a message via Waha API
-# def send_whatsapp_message(group_id, message):
-#     url = f"{WAHA_API_BASE_URL}/sendMessage"
-#     headers = {
-#         'Authorization': f'Bearer {WAHA_API_KEY}',
-#         'Content-Type': 'application/json'
-#     }
-#     data = {
-#         "group_id": group_id,
-#         "message": message
-#     }
-#     response = requests.post(url, headers=headers, json=data)
-#     return response.status_code, response.text
-
-
 # Function to handle message when bot is mentioned, with chat log analysis
 def handle_mention(message, group_id):
     # Build contextual prompt with chat history
