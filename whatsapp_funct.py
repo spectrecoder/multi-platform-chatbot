@@ -93,11 +93,7 @@ def handle_mention(message, group_id):
             prompt=prompt,
             max_tokens=150
         )
-        # response = openai.Completion.create(
-        #     engine="gpt-4o-mini",
-        #     prompt=prompt,
-        #     max_tokens=150
-        # )
+        
         reply = response['choices'][0]['text'].strip()
         return reply
     except Exception as e:
