@@ -161,40 +161,6 @@ def slack_events():
     return handler.handle(request)
 
 
-
-
-
-
-
-
-
-
-
-#     )
-
-#     try:
-#         search_results = zep_client.memory.search_memory(session_id, search_payload, limit=5)
-        
-#         if search_results:
-#             response = "Search results:\n\n"
-#             for result in search_results:
-#                 if result.message:
-#                     content = result.message.get('content', 'No content available')
-#                     response += f"{content}\n\n"
-#         else:
-#             response = "No results found for the given keyword."
-
-#         respond(response)
-#     except Exception as e:
-#         logger.error(f"Error in search_chat: {str(e)}")
-#         respond("An error occurred while searching. Please try again later.")
-
-# # Flask route for Slack events
-# @flask_app.route("/slack/events", methods=["POST"])
-# def slack_events():
-#     return handler.handle(request)
-
-
 # Main execution
 if __name__ == "__main__":
     print("Starting the Slack bot server...")
