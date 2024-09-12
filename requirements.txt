@@ -18,9 +18,3 @@ aiohttp
 slack-bolt[async]
 gunicorn
 twilio
-
-# Flask
-# aiohttp
-# slack-bolt[async]
-# gunicorn
-# twilio
