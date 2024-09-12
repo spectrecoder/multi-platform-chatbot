@@ -4,6 +4,8 @@ import openai
 import zep_python as zep
 from dotenv import load_dotenv
 from datetime import datetime
+import psycopg2
+from psycopg2 import sql
 
 # Load environment variables from .env file
 load_dotenv()
@@ -14,25 +16,69 @@ WAHA_API_KEY = os.getenv('WAHA_API_KEY')  # Loaded from .env
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')  # Loaded from .env
 ZEP_API_BASE_URL = os.getenv('ZEP_API_BASE_URL')  # Loaded from .env
 
+# PostgreSQL configuration
+DB_NAME = os.getenv('DB_NAME')
+DB_USER = os.getenv('DB_USER')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
+DB_HOST = os.getenv('DB_HOST')
+DB_PORT = os.getenv('DB_PORT')
+
 # Set OpenAI API key
 openai.api_key = OPENAI_API_KEY
 
 # Initialize Zep client
 zep_client = zep.ZepClient(base_url=ZEP_API_BASE_URL)
 
+# Function to create PostgreSQL connection
+def get_db_connection():
+    return psycopg2.connect(
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
+    )
+
+# Function to create the messages table if it doesn't exist
+def create_messages_table():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS messages (
+            id SERIAL PRIMARY KEY,
+            group_id TEXT NOT NULL,
+            sender TEXT NOT NULL,
+            message TEXT NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.commit()
+    cur.close()
+    conn.close()
+
+# Function to log messages to PostgreSQL
+def log_message_to_postgres(group_id, sender, message):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute(
+        sql.SQL("INSERT INTO messages (group_id, sender, message) VALUES (%s, %s, %s)"),
+        (group_id, sender, message)
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+    print(f"Logged message to PostgreSQL: {message} from {sender} in group {group_id}")
+
 # Function to log messages to Zep
 def log_message_to_zep(message, sender, group_id):
     session_id = group_id  # Use group ID as the session ID
     
-    # Check if session exists, otherwise create a new one
     try:
         session = zep_client.get_session(session_id)
     except zep.SessionNotFound:
-        # If the session does not exist, create it
         session = zep.Session(session_id=session_id, metadata={"group_name": group_id})
         zep_client.add_session(session)
     
-    # Create a new message object
     chat_message = zep.Message(
         role="user",
         content=message,
@@ -42,9 +88,7 @@ def log_message_to_zep(message, sender, group_id):
         }
     )
     
-    # Add the message to the session
     zep_client.add_message(session_id, chat_message)
-    
     print(f"Logged message to Zep: {message} from {sender} in group {group_id}")
 
 # Function to retrieve chat history from Zep
@@ -62,7 +106,6 @@ def build_contextual_prompt(current_message, group_id):
         [f"{msg.metadata['sender']}: {msg.content}" for msg in history if msg.content]
     )
     
-    # Combine chat history and current message into one prompt
     prompt = f"Conversation history:\n{history_content}\n\nUser's latest message:\n{current_message}\n\nReply to the user based on the conversation above."
     return prompt
 
@@ -80,13 +123,10 @@ def send_whatsapp_message(group_id, message):
     response = requests.post(url, headers=headers, json=data)
     return response.status_code, response.text
 
-
 # Function to handle message when bot is mentioned, with chat log analysis
 def handle_mention(message, group_id):
-    # Build contextual prompt with chat history
     prompt = build_contextual_prompt(message, group_id)
     
-    # Use OpenAI GPT-4o-mini to generate a reply
     try:
         response = openai.Completion.create(
             engine="gpt-4o-mini",
@@ -110,7 +150,6 @@ def process_messages():
 
     while True:
         try:
-            # Fetch new messages from the group
             response = requests.get(url, headers=headers)
             messages = response.json()
 
@@ -119,10 +158,10 @@ def process_messages():
                 sender = msg['sender']
                 message = msg['message']
 
-                # Log the message to Zep
+                # Log the message to both PostgreSQL and Zep
+                log_message_to_postgres(group_id, sender, message)
                 log_message_to_zep(message, sender, group_id)
 
-                # Check if the bot is mentioned
                 if 'bot_name' in message:  # Replace 'bot_name' with your bot's identifier
                     reply = handle_mention(message, group_id)
                     send_whatsapp_message(group_id, reply)
@@ -130,4 +169,6 @@ def process_messages():
         except Exception as e:
             print(f"Error processing messages: {e}")
 
-
+if __name__ == "__main__":
+    create_messages_table()
+    process_messages()
