@@ -199,6 +199,11 @@ def process_messages():
                 sender = msg['sender']
                 message = msg['message']
 
+
+                # group_id = msg['group_id']
+                # sender = msg['sender']
+                # message = msg['message']
+
                 try:
                     log_message_to_postgres(group_id, sender, message)
                     log_message_to_zep(message, sender, group_id)
