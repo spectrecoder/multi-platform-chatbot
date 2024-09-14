@@ -218,6 +218,46 @@ def process_messages():
         # Add a small delay to avoid hammering the API
         time.sleep(1)
 
+
+def process_messages():
+    url = f"{WAHA_API_BASE_URL}/getMessages"
+    headers = {
+        'Authorization': f'Bearer {WAHA_API_KEY}',
+        'Content-Type': 'application/json'
+    }
+
+    while True:
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            messages = response.json()
+
+            for msg in messages:
+                group_id = msg['group_id']
+                sender = msg['sender']
+                message = msg['message']
+
+                try:
+                    log_message_to_postgres(group_id, sender, message)
+                    log_message_to_zep(message, sender, group_id)
+
+                    if 'bot_name' in message:  # Replace 'bot_name' with your bot's identifier
+                        reply = handle_mention(message, group_id)
+                        send_whatsapp_message(group_id, reply)
+                except Exception as e:
+                    logger.error(f"Error processing message: {e}")
+                    continue  # Continue with the next message even if there's an error
+
+        except requests.RequestException as e:
+            logger.error(f"Error fetching messages from WAHA API: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error in message processing loop: {e}")
+        
+        # Add a small delay to avoid hammering the API
+        time.sleep(1)
+
+
+
 if __name__ == "__main__":
     try:
         create_messages_table()
