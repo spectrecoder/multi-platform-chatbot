@@ -82,24 +82,7 @@ def create_messages_table():
 
 
 
-# def create_messages_table():
-#     try:
-#         with get_db_connection() as conn:
-#             with conn.cursor() as cur:
-#                 cur.execute("""
-#                     CREATE TABLE IF NOT EXISTS messages (
-#                         id SERIAL PRIMARY KEY,
-#                         group_id TEXT NOT NULL,
-#                         sender TEXT NOT NULL,
-#                         message TEXT NOT NULL,
-#                         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-#                     )
-#                 """)
-#             conn.commit()
-#         logger.info("Messages table created successfully or already exists.")
-#     except psycopg2.Error as e:
-#         logger.error(f"Failed to create messages table: {e}")
-#         raise
+
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
@@ -257,13 +240,3 @@ if __name__ == "__main__":
         sys.exit(1)
 
 
-# if __name__ == "__main__":
-#     try:
-#         create_messages_table()
-#         logger.info("Starting message processing...")
-#         process_messages()
-#     except KeyboardInterrupt:
-#         logger.info("Shutting down gracefully...")
-#     except Exception as e:
-#         logger.critical(f"Critical error: {e}")
-#         sys.exit(1)
