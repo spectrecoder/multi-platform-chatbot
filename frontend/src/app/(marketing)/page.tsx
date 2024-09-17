@@ -92,6 +92,14 @@ const HomePage = () => {
                   quality={100}
                   className="rounded-md lg:rounded-xl bg-foreground/10 shadow-2xl ring-1 ring-border"
                 />
+                {/* <Image
+                  src="/assets/feature.jpg"
+                  alt="banner image"
+                  width={1200}
+                  height={1200}
+                  quality={100}
+                  className="rounded-md lg:rounded-xl bg-foreground/10 shadow-2xl ring-1 ring-border"
+                /> */}
 
                 <BorderBeam size={250} duration={12} delay={9} />
               </div>
