@@ -105,7 +105,7 @@ const HomePage = () => {
           <div className="max-w-md mx-auto text-start md:text-center">
             <SectionBadge title="The Process" />
             <h2 className="text-3xl lg:text-4xl font-semibold mt-6">
-              Three steps to build your dream website
+              Three steps to integrate to your business
             </h2>
             <p className="text-muted-foreground mt-6">
               Turn your vision into reality in just 3 simple steps
