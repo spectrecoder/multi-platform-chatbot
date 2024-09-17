@@ -224,6 +224,13 @@ def process_messages():
         time.sleep(1)
 
 
+# except requests.RequestException as e:
+#             logger.error(f"Error fetching messages from WAHA API: {e}")
+#         except Exception as e:
+#             logger.error(f"Unexpected error in message processing loop: {e}")
+        
+#         # Add a small delay to avoid hammering the API
+#         time.sleep(1)
 
 
 
