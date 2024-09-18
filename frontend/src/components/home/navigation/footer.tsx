@@ -1,6 +1,8 @@
 import Icons from "@/components/global/icons";
 import { Heart } from "lucide-react";
 import Link from "next/link";
+import logo from "../../../../public/icons/logo.png";
+import Image from "next/image";
 
 const Footer = () => {
   return (
@@ -11,7 +13,13 @@ const Footer = () => {
       <div className="grid gap-8 xl:grid-cols-3 xl:gap-8 w-full">
         <div className="flex flex-col items-start justify-start md:max-w-[200px]">
           <div className="flex items-start">
-            <Icons.logo className="w-7 h-7" />
+            {/* <Icons.logo className="w-7 h-7" /> */}
+            <Image
+              alt="multi channel business chat"
+              height={20}
+              width={20}
+              src={logo}
+            />
           </div>
           <p className="text-muted-foreground mt-4 text-sm text-start">
             {/* Build beautiful, functional websites, without writing code */}

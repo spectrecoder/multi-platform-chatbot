@@ -11,8 +11,8 @@ export const SITE_CONFIG: Metadata = {
   icons: {
     icon: [
       {
-        url: "/icons/favicon.ico",
-        href: "/icons/favicon.ico",
+        url: "/icons/logo.png",
+        href: "/icons/logo.png",
       },
     ],
   },

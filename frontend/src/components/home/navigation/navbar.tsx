@@ -1,8 +1,10 @@
 import { Container, Icons } from "@/components";
+import logo from "../../../../public/icons/logo.png";
 import { buttonVariants } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
+import Image from "next/image";
 
 const Navbar = async () => {
   const user = await currentUser();
@@ -13,7 +15,13 @@ const Navbar = async () => {
         <div className="flex items-center justify-between h-full mx-auto md:max-w-screen-xl">
           <div className="flex items-start">
             <Link href="/" className="flex items-center gap-2">
-              <Icons.logo className="w-8 h-8" />
+              {/* <Icons.logo className="w-8 h-8" /> */}
+              <Image
+                alt="multi channel business chat"
+                height={50}
+                width={50}
+                src={logo}
+              />
               <span className="text-lg font-medium">
                 Multi Channel Business Ghat
               </span>

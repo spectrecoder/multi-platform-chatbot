@@ -320,11 +320,12 @@ const HomePage = () => {
           <LampContainer>
             <div className="flex flex-col items-center justify-center relative w-full text-center">
               <h2 className="text-4xl lg:text-5xl xl:text-6xl lg:!leading-snug font-semibold mt-8">
-                From Idea to Launch <br /> Faster Than Ever
+                Make informed decisions without constantly monitoring every
+                conversation
               </h2>
               <p className="text-muted-foreground mt-6 max-w-md mx-auto">
-                Build stunning websites with Multi Channel Business Ghat&apos;s
-                intuitive drag-and-drop builder and powerful AI assistant
+                Our solution is designed to be easy to implement and scale
+                according to your business's growth.
               </p>
               <Button variant="white" className="mt-6" asChild>
                 <Link href="/sign-in">
