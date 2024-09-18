@@ -3,52 +3,52 @@ import { Icons } from "@/components";
 export const perks = [
   {
     icon: Icons.auth,
-    title: "Sign Up",
-    info: "Create your free account to get started with Multi Channel Business Ghat.",
+    title: "Increased Productivity",
+    info: "With AI handling routine inquiries and tasks, your team can focus on more critical work.",
   },
   {
     icon: Icons.customize,
-    title: "Customize",
-    info: "Choose a template and customize it to fit your needs.",
+    title: "Better Decision Support",
+    info: "Advanced search and analytical tools provide management with valuable insights, helping them make informed decisions quickly.",
   },
   {
     icon: Icons.launch,
-    title: "Launch",
-    info: "Publish your website and share it with the world.",
+    title: "Improved Collaboration",
+    info: "Seamless integration and real-time assistance foster a more collaborative and efficient working environment.",
   },
 ];
 
 export const features = [
   {
     icon: Icons.bolt,
-    title: "Fast Setup",
-    info: "Get your website up and running in minutes with our intuitive AI-powered builder.",
+    title: "Multi-Platform Integration",
+    info: "Our AI bots can be integrated into popular chat platforms like Slack, WhatsApp, Telegram, Discord, and more, ensuring seamless adoption across your organization.",
   },
   {
     icon: Icons.palette,
-    title: "Customizable Templates",
-    info: "Choose from a variety of stunning templates and customize them to suit your brand.",
+    title: "Enhanced Communication",
+    info: "AI-powered bots assist in conversations by providing real-time information, answering queries, and facilitating smoother communication among team members.",
   },
   {
     icon: Icons.seo,
-    title: "SEO Optimized",
-    info: "Built-in SEO features ensure your website ranks well on search engines.",
+    title: "Effortless Decision-Making",
+    info: "Our solution allows for advanced search capabilities, making it easy for management to retrieve and analyze relevant information without sifting through endless chat logs.",
   },
-  {
-    icon: Icons.monitor,
-    title: "Responsive Design",
-    info: "Your website will look great on any device, from desktops to mobile phones.",
-  },
-  {
-    icon: Icons.shop,
-    title: "E-Commerce Ready",
-    info: "Start selling online with our e-commerce features and integrations.",
-  },
-  {
-    icon: Icons.server,
-    title: "Secure Hosting",
-    info: "Enjoy peace of mind with secure and reliable hosting for your website.",
-  },
+  // {
+  //   icon: Icons.monitor,
+  //   title: "Custom Functions",
+  //   info: "Tailor the AI to fit specific business needs with custom functions.",
+  // },
+  // {
+  //   icon: Icons.shop,
+  //   title: "E-Commerce Ready",
+  //   info: "Start selling online with our e-commerce features and integrations.",
+  // },
+  // {
+  //   icon: Icons.server,
+  //   title: "Secure Hosting",
+  //   info: "Enjoy peace of mind with secure and reliable hosting for your website.",
+  // },
 ];
 
 export const pricingCards = [

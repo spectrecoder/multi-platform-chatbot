@@ -103,13 +103,13 @@ const HomePage = () => {
       <Wrapper className="flex flex-col items-center justify-center py-12 relative">
         <Container>
           <div className="max-w-md mx-auto text-start md:text-center">
-            <SectionBadge title="The Process" />
+            <SectionBadge title="The Benefits" />
             <h2 className="text-3xl lg:text-4xl font-semibold mt-6">
-              Three steps to integrate to your business
+              Three Significant Benefits by our AI integration
             </h2>
-            <p className="text-muted-foreground mt-6">
+            {/* <p className="text-muted-foreground mt-6">
               Turn your vision into reality in just 3 simple steps
-            </p>
+            </p> */}
           </div>
         </Container>
         <Container>
