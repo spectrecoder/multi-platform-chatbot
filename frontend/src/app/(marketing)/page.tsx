@@ -144,8 +144,10 @@ const HomePage = () => {
               Discover our powerful features
             </h2>
             <p className="text-muted-foreground mt-6">
-              Multi Channel Business Ghat offers a range of features to help you
-              build a stunning website in no time
+              Our AI integration service places intelligent bots into any chat
+              platform your business uses, enhancing team productivity and
+              providing management with the tools to make better decisions
+              effortlessly
             </p>
           </div>
         </Container>
