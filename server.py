@@ -89,25 +89,7 @@ class ZepIntegration:
             text=query,
             search_scope="summary"
         )
-        results = await self.zep_client.memory.asearch_memory(session_id, searchPayload, limit=SEARCH_RESULT_LIMIT)
-
-        summaries = [r for r in results if r.metadata.get('type') == 'summary']
-        messages = [r for r in results if r.metadata.get('type') != 'summary']
-
-        query_embedding = await self.zep_client.memory.acreate_embedding(query)
-        summary_embeddings = [await self.zep_client.memory.acreate_embedding(s.content) for s in summaries]
-        message_embeddings = [await self.zep_client.memory.acreate_embedding(m.content) for m in messages]
-
-        ranked_summaries = self.rank_by_relevance(query_embedding, summary_embeddings, summaries)
-        ranked_messages = self.rank_by_relevance(query_embedding, message_embeddings, messages)
-
-        summary_context = self.select_context(ranked_summaries, summary_token_limit)
-        message_context = self.select_context(ranked_messages, message_token_limit)
-
-        # Combine all context types
-        combined_context = self.merge_context(graph_context, facts_context, summary_context, message_context)
-
-        return combined_context
+        
 
     async def get_graph_context(self, query: str, max_tokens: int):
         # Identify entities in the query
@@ -136,28 +118,7 @@ class ZepIntegration:
         return "\n".join(graph_context)
 
     async def get_facts_context(self, session_id: str, query: str, max_tokens: int):
-        facts = await self.zep_client.memory.get_facts(session_id)
-        
-        # Filter facts based on confidence threshold
-        confident_facts = [f for f in facts if f.confidence >= FACTS_CONFIDENCE_THRESHOLD]
-        
-        # Sort facts by relevance to the query
-        query_embedding = await self.zep_client.memory.acreate_embedding(query)
-        fact_embeddings = [await self.zep_client.memory.acreate_embedding(f.fact) for f in confident_facts]
-        ranked_facts = self.rank_by_relevance(query_embedding, fact_embeddings, confident_facts)
-        
-        facts_context = []
-        current_tokens = 0
-        
-        for fact, relevance in ranked_facts[:MAX_FACTS]:
-            fact_text = f"Fact: {fact.fact} (Confidence: {fact.confidence:.2f})"
-            if current_tokens + self.count_tokens(fact_text) <= max_tokens:
-                facts_context.append(fact_text)
-                current_tokens += self.count_tokens(fact_text)
-            else:
-                break
-        
-        return "\n".join(facts_context)
+       
 
     def select_context(self, ranked_items, max_tokens):
         selected = []
