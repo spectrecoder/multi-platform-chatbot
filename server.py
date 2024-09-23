@@ -8,20 +8,7 @@ import openai
 from config import *
 
 class ZepIntegration:
-    def __init__(self, zep_api_url, zep_api_key, pg_config):
-        self.zep_client = ZepClient(base_url=zep_api_url, api_key=zep_api_key)
-        self.pg_config = pg_config
-        self.pool = None
-
-    async def initialize(self):
-        self.pool = await asyncpg.create_pool(**self.pg_config)
-        async with self.pool.acquire() as conn:
-            await conn.execute('''
-                CREATE TABLE IF NOT EXISTS sessions (
-                    chat_id TEXT PRIMARY KEY,
-                    session_id UUID NOT NULL
-                )
-            ''')
+    
 
     async def get_session_id(self, chat_id: str) -> str:
         async with self.pool.acquire() as conn:
@@ -89,11 +76,7 @@ class ZepIntegration:
     async def get_relevant_context(self, chat_id: str, query: str, max_tokens: int):
         session_id = await self.get_session_id(chat_id)
         
-        # Calculate token limits for each context type
-        graph_token_limit = int(max_tokens * GRAPH_CONTEXT_PERCENTAGE)
-        facts_token_limit = int(max_tokens * FACTS_CONTEXT_PERCENTAGE)
-        message_token_limit = int(max_tokens * MESSAGE_CONTEXT_PERCENTAGE)
-        summary_token_limit = int(max_tokens * SUMMARY_CONTEXT_PERCENTAGE)
+        
 
         # Get graph context
         graph_context = await self.get_graph_context(query, graph_token_limit)
