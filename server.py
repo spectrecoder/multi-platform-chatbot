@@ -10,20 +10,20 @@ from config import *
 class ZepIntegration:
     
 
-    async def get_session_id(self, chat_id: str) -> str:
-        async with self.pool.acquire() as conn:
-            row = await conn.fetchrow(
-                'SELECT session_id FROM sessions WHERE chat_id = $1',
-                chat_id
-            )
-            if row:
-                return str(row['session_id'])
-            session_id = str(uuid.uuid4())
-            await conn.execute(
-                'INSERT INTO sessions (chat_id, session_id) VALUES ($1, $2)',
-                chat_id, session_id
-            )
-            return session_id
+    # async def get_session_id(self, chat_id: str) -> str:
+    #     async with self.pool.acquire() as conn:
+    #         row = await conn.fetchrow(
+    #             'SELECT session_id FROM sessions WHERE chat_id = $1',
+    #             chat_id
+    #         )
+    #         if row:
+    #             return str(row['session_id'])
+    #         session_id = str(uuid.uuid4())
+    #         await conn.execute(
+    #             'INSERT INTO sessions (chat_id, session_id) VALUES ($1, $2)',
+    #             chat_id, session_id
+    #         )
+    #         return session_id
 
     async def add_memory(self, chat_id: str, role: str, content: str, timestamp=None):
         session_id = await self.get_session_id(chat_id)
