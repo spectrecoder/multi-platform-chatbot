@@ -10,20 +10,20 @@ from config import *
 class ZepIntegration:
     
 
-    # async def get_session_id(self, chat_id: str) -> str:
-    #     async with self.pool.acquire() as conn:
-    #         row = await conn.fetchrow(
-    #             'SELECT session_id FROM sessions WHERE chat_id = $1',
-    #             chat_id
-    #         )
-    #         if row:
-    #             return str(row['session_id'])
-    #         session_id = str(uuid.uuid4())
-    #         await conn.execute(
-    #             'INSERT INTO sessions (chat_id, session_id) VALUES ($1, $2)',
-    #             chat_id, session_id
-    #         )
-    #         return session_id
+    async def get_session_id(self, chat_id: str) -> str:
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow(
+                'SELECT session_id FROM sessions WHERE chat_id = $1',
+                chat_id
+            )
+            if row:
+                return str(row['session_id'])
+            session_id = str(uuid.uuid4())
+            await conn.execute(
+                'INSERT INTO sessions (chat_id, session_id) VALUES ($1, $2)',
+                chat_id, session_id
+            )
+            return session_id
 
     async def add_memory(self, chat_id: str, role: str, content: str, timestamp=None):
         session_id = await self.get_session_id(chat_id)
@@ -117,9 +117,6 @@ class ZepIntegration:
 
         return "\n".join(graph_context)
 
-    async def get_facts_context(self, session_id: str, query: str, max_tokens: int):
-       
-
     def select_context(self, ranked_items, max_tokens):
         selected = []
         current_tokens = 0
@@ -157,4 +154,25 @@ class ZepIntegration:
         # This is a simplified token counting method. In a real implementation,
         # you might want to use a tokenizer that matches your model's tokenization.
         return len(text.split())
+
+
+# @staticmethod
+#     def rank_by_relevance(query_embedding, candidate_embeddings, candidates):
+#         similarities = [ZepIntegration.cosine_similarity(query_embedding, emb) for emb in candidate_embeddings]
+#         ranked = sorted(zip(candidates, similarities), key=lambda x: x[1], reverse=True)
+#         return ranked
+
+#     @staticmethod
+#     def cosine_similarity(v1, v2):
+#         if VECTOR_NORMALIZATION:
+#             v1 = v1 / np.linalg.norm(v1)
+#             v2 = v2 / np.linalg.norm(v2)
+#         return np.dot(v1, v2)
+
+#     @staticmethod
+#     def count_tokens(text):
+#         # This is a simplified token counting method. In a real implementation,
+#         # you might want to use a tokenizer that matches your model's tokenization.
+#         return len(text.split())
+
 
