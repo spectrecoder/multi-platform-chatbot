@@ -166,3 +166,23 @@ if __name__ == "__main__":
     print("Starting the Slack bot server...")
     flask_app.run(port=5001)
 
+# def handle_bot_mention(event, say, session_id):
+#     try:
+#         channel_id = event["channel"]
+#         text = event["text"]
+
+#         thinking_message = say("Thinking...")
+
+#         # Retrieve chat history
+#         messages = get_session_messages(session_id)
+#         chat_history = "\n".join([f"{m.role}: {m.content}" for m in messages])
+
+#         gpt_messages = [
+#             {"role": "system", "content": "You are a helpful Slack assistant."},
+#             {"role": "user", "content": f"Chat history:\n{chat_history}\n\nUser: {text}"}
+#         ]
+
+#         response = openai.ChatCompletion.create(
+#             model=RESPONSE_GENERATION_MODEL,
+#             messages=gpt_messages
+#         )
