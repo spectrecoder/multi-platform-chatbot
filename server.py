@@ -156,23 +156,6 @@ class ZepIntegration:
         return len(text.split())
 
 
-# @staticmethod
-#     def rank_by_relevance(query_embedding, candidate_embeddings, candidates):
-#         similarities = [ZepIntegration.cosine_similarity(query_embedding, emb) for emb in candidate_embeddings]
-#         ranked = sorted(zip(candidates, similarities), key=lambda x: x[1], reverse=True)
-#         return ranked
 
-#     @staticmethod
-#     def cosine_similarity(v1, v2):
-#         if VECTOR_NORMALIZATION:
-#             v1 = v1 / np.linalg.norm(v1)
-#             v2 = v2 / np.linalg.norm(v2)
-#         return np.dot(v1, v2)
-
-#     @staticmethod
-#     def count_tokens(text):
-#         # This is a simplified token counting method. In a real implementation,
-#         # you might want to use a tokenizer that matches your model's tokenization.
-#         return len(text.split())
 
 
