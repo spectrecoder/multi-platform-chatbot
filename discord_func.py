@@ -20,6 +20,8 @@ from asyncpg.pool import Pool
 
 from zep_python import (ZepClient, MemorySearchPayload)
 from zep_python.memory import Memory, Message
+from zep_python.client import AsyncZep
+from zep_python.types import Message
 
 
 load_dotenv()
@@ -49,7 +51,7 @@ message_counters = {}
 
 
 
-zep_client = ZepClient(ZEP_API_URL, ZEP_API_KEY)
+zep_client = AsyncZep(ZEP_API_URL, ZEP_API_KEY)
 
 
 

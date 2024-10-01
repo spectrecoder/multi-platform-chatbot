@@ -17,6 +17,8 @@ import re
 import tiktoken
 from datetime import datetime
 from typing import List
+from zep_python.client import AsyncZep
+from zep_python.types import Message
 
 # Load environment variables
 load_dotenv()
@@ -33,7 +35,7 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 # Initialize clients
 openai.api_key = OPENAI_API_KEY
-zep_client = ZepClient(base_url=ZEP_API_URL, api_key=ZEP_API_KEY)
+zep_client = AsyncZep(base_url=ZEP_API_URL, api_key=ZEP_API_KEY)
 
 
 

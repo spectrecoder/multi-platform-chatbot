@@ -6,9 +6,12 @@ from flask import Flask, request
 import openai
 from zep_python import ZepClient, MemorySearchPayload
 from zep_python.memory import Memory, Message
+from zep_python.client import AsyncZep
+from zep_python.types import Message
 from datetime import datetime
 import logging
 import traceback
+
 
 # Load environment variables
 load_dotenv()
@@ -24,7 +27,7 @@ app = App(token=os.environ["SLACK_BOT_TOKEN"])
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 # Initialize Zep client
-zep_client = ZepClient(base_url=os.environ["ZEP_API_URL"], api_key=os.environ["ZEP_API_KEY"])
+zep_client = AsyncZep(base_url=os.environ["ZEP_API_URL"], api_key=os.environ["ZEP_API_KEY"])
 
 # Initialize Flask app
 flask_app = Flask(__name__)
@@ -119,41 +122,41 @@ def handle_bot_mention(event, say, session_id):
         logger.error(traceback.format_exc())
         say("An error occurred while processing your request. Please try again later.")
 
-@app.command("/search")
-def search_chat(ack, respond, command):
-    ack()
+# @app.command("/search")
+# def search_chat(ack, respond, command):
+#     ack()
     
-    keyword = command['text']
-    channel_id = command['channel_id']
-    session_id = f"slack_channel_{channel_id}"
+#     keyword = command['text']
+#     channel_id = command['channel_id']
+#     session_id = f"slack_channel_{channel_id}"
 
-    if not keyword:
-        respond("Please provide a search keyword. Usage: /search <keyword>")
-        return
+#     if not keyword:
+#         respond("Please provide a search keyword. Usage: /search <keyword>")
+#         return
 
-    search_payload = MemorySearchPayload(
-        text=keyword,
-        search_scope="messages",
-        search_type="mmr",
-        mmr_lambda=0.5
-    )
+#     search_payload = MemorySearchPayload(
+#         text=keyword,
+#         search_scope="messages",
+#         search_type="mmr",
+#         mmr_lambda=0.5
+#     )
 
-    try:
-        search_results = zep_client.memory.search_memory(session_id, search_payload, limit=5)
+#     try:
+#         search_results = zep_client.memory.search_memory(session_id, search_payload, limit=5)
         
-        if search_results:
-            response = "Search results:\n\n"
-            for result in search_results:
-                if result.message:
-                    content = result.message.get('content', 'No content available')
-                    response += f"{content}\n\n"
-        else:
-            response = "No results found for the given keyword."
+#         if search_results:
+#             response = "Search results:\n\n"
+#             for result in search_results:
+#                 if result.message:
+#                     content = result.message.get('content', 'No content available')
+#                     response += f"{content}\n\n"
+#         else:
+#             response = "No results found for the given keyword."
 
-        respond(response)
-    except Exception as e:
-        logger.error(f"Error in search_chat: {str(e)}")
-        respond("An error occurred while searching. Please try again later.")
+#         respond(response)
+#     except Exception as e:
+#         logger.error(f"Error in search_chat: {str(e)}")
+#         respond("An error occurred while searching. Please try again later.")
 
 # Flask route for Slack events
 @flask_app.route("/slack/events", methods=["POST"])
