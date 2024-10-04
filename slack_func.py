@@ -6,8 +6,8 @@ from flask import Flask, request
 import openai
 from zep_python import ZepClient, MemorySearchPayload
 from zep_python.memory import Memory, Message
-from zep_python.client import AsyncZep
-from zep_python.types import Message
+# from zep_python.client import AsyncZep
+# from zep_python.types import Message
 from datetime import datetime
 import logging
 import traceback
