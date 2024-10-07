@@ -63,6 +63,19 @@ def handle_message(event, say):
         # Generate a session_id based on channel_id
         session_id = f"slack_channel_{channel_id}"
 
+# @app.event("message")
+# def handle_message(event, say):
+#     try:
+#         channel_id = event["channel"]
+#         user_id = event.get("user", "Unknown")
+#         text = event.get("text", "")
+#         timestamp = datetime.fromtimestamp(float(event["ts"])).strftime("%Y.%m.%d")
+
+#         logger.info(f"Received message in channel {channel_id} from user {user_id}: {text}")
+
+#         # Generate a session_id based on channel_id
+#         session_id = f"slack_channel_{channel_id}"
+
         # Save message to Zep memory
         user_memory = Memory(
             messages=[Message(role="user", content=f"{user_id} ({timestamp}): {text}", timestamp=timestamp)],
