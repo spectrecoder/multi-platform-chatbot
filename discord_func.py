@@ -276,7 +276,7 @@ async def on_message(message):
 
 
 async def generate_response(channel_id, user_message):
-    session_id = await get_channel_session_id(channel_id)
+    session_id = f"discord_chat_{await get_channel_session_id(channel_id)}"
 
     async with ZepClient(ZEP_API_URL, ZEP_API_KEY) as client:
         try:
@@ -562,7 +562,7 @@ def rate_limit(func):
 @bot.command(name='search')
 async def search(ctx, keyword: str):
     channel_id = str(ctx.channel.id)
-    session_id = await get_channel_session_id(channel_id)
+    session_id = f"discord_chat_{await get_channel_session_id(channel_id)}"
 
     async with ZepClient(ZEP_API_URL, ZEP_API_KEY) as client:
         try:
