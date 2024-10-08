@@ -366,8 +366,6 @@ const HomePage = () => {
                   </Button>
                 </form>
                 <p className="text-xs text-muted-foreground">
-                  By subscribing you agree with our{" "}
-                  <Link href="#">Privacy Policy</Link>
                 </p>
               </div>
             </div>
