@@ -20,8 +20,6 @@ from asyncpg.pool import Pool
 
 from zep_python import (ZepClient, MemorySearchPayload)
 from zep_python.memory import Memory, Message
-from zep_python.client import AsyncZep
-from zep_python.types import Message
 
 
 load_dotenv()
@@ -51,7 +49,7 @@ message_counters = {}
 
 
 
-zep_client = AsyncZep(ZEP_API_URL, ZEP_API_KEY)
+zep_client = ZepClient(ZEP_API_URL, ZEP_API_KEY)
 
 
 
@@ -217,7 +215,7 @@ async def on_message(message):
 
     channel_id = message.channel.id
     content = message.content
-    session_id = await get_channel_session_id(channel_id)
+    session_id = f"discord_chat_{await get_channel_session_id(channel_id)}"
 
     # Check if the message is a command starting with '/'
     is_slash_command = content.startswith('/')
