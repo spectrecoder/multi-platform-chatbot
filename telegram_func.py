@@ -17,8 +17,6 @@ import re
 import tiktoken
 from datetime import datetime
 from typing import List
-from zep_python.client import AsyncZep
-from zep_python.types import Message
 
 # Load environment variables
 load_dotenv()
