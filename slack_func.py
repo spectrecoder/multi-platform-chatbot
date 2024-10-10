@@ -6,11 +6,9 @@ from flask import Flask, request
 import openai
 from zep_python import ZepClient, MemorySearchPayload
 from zep_python.memory import Memory, Message
-
 from datetime import datetime
 import logging
 import traceback
-
 
 # Load environment variables
 load_dotenv()
@@ -62,20 +60,7 @@ def handle_message(event, say):
         # Generate a session_id based on channel_id
         session_id = f"slack_channel_{channel_id}"
 
-@app.event("message")
-def handle_message(event, say):
-    try:
-        channel_id = event["channel"]
-        user_id = event.get("user", "Unknown")
-        text = event.get("text", "")
-        timestamp = datetime.fromtimestamp(float(event["ts"])).strftime("%Y.%m.%d")
-
-        logger.info(f"Received message in channel {channel_id} from user {user_id}: {text}")
-
-        # Generate a session_id based on channel_id
-        session_id = f"slack_channel_{channel_id}"
-
-        Save message to Zep memory
+        # Save message to Zep memory
         user_memory = Memory(
             messages=[Message(role="user", content=f"{user_id} ({timestamp}): {text}", timestamp=timestamp)],
             metadata={"session_id": session_id}
@@ -175,9 +160,7 @@ def search_chat(ack, respond, command):
 def slack_events():
     return handler.handle(request)
 
-
 # Main execution
 if __name__ == "__main__":
     print("Starting the Slack bot server...")
     flask_app.run(port=5001)
-
