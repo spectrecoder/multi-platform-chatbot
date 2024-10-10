@@ -6,8 +6,7 @@ from flask import Flask, request
 import openai
 from zep_python import ZepClient, MemorySearchPayload
 from zep_python.memory import Memory, Message
-# from zep_python.client import AsyncZep
-# from zep_python.types import Message
+
 from datetime import datetime
 import logging
 import traceback
@@ -27,7 +26,7 @@ app = App(token=os.environ["SLACK_BOT_TOKEN"])
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 # Initialize Zep client
-zep_client = AsyncZep(base_url=os.environ["ZEP_API_URL"], api_key=os.environ["ZEP_API_KEY"])
+zep_client = ZepClient(base_url=os.environ["ZEP_API_URL"], api_key=os.environ["ZEP_API_KEY"])
 
 # Initialize Flask app
 flask_app = Flask(__name__)
@@ -61,7 +60,7 @@ def handle_message(event, say):
         logger.info(f"Received message in channel {channel_id} from user {user_id}: {text}")
 
         # Generate a session_id based on channel_id
-        session_id = f"slack_chat_{channel_id}"
+        session_id = f"slack_channel_{channel_id}"
 
 @app.event("message")
 def handle_message(event, say):
@@ -74,9 +73,9 @@ def handle_message(event, say):
         logger.info(f"Received message in channel {channel_id} from user {user_id}: {text}")
 
         # Generate a session_id based on channel_id
-        session_id = f"slack_chat_{channel_id}"
+        session_id = f"slack_channel_{channel_id}"
 
-        # Save message to Zep memory
+        Save message to Zep memory
         user_memory = Memory(
             messages=[Message(role="user", content=f"{user_id} ({timestamp}): {text}", timestamp=timestamp)],
             metadata={"session_id": session_id}
@@ -141,7 +140,7 @@ def search_chat(ack, respond, command):
     
     keyword = command['text']
     channel_id = command['channel_id']
-    session_id = f"slack_chat_{channel_id}"
+    session_id = f"slack_channel_{channel_id}"
 
     if not keyword:
         respond("Please provide a search keyword. Usage: /search <keyword>")
