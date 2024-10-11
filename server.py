@@ -14,7 +14,11 @@ from discord.ext import commands
 import telegram
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
-
+from zep_python import ZepClient, MemorySearchPayload
+from zep_python.memory import Memory, Message
+import asyncpg
+from asyncpg.pool import Pool
+import tiktoken
 
 # Load environment variables
 load_dotenv()
