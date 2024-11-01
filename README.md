@@ -66,4 +66,4 @@ Contributions, issues, and feature requests are welcome. Feel free to check [iss
 
 ## Contact
 
-Project Link: [https://github.com/Kevine0921](https://github.com/spectrecoder/mutil-platform-chatbot)
+Project Link: [https://github.com/spectrecoder](https://github.com/spectrecoder/mutil-platform-chatbot)
