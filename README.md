@@ -9,7 +9,7 @@ Our AI integration service places intelligent bots into any chat platform your b
 - **Multi-Platform Integration**: Our AI bots can be integrated into popular chat platforms like Slack, WhatsApp, Telegram, Discord, and more, ensuring seamless adoption across your organization.
 - **Enhanced Communication**: AI-powered bots assist in conversations by providing real-time information, answering queries, and facilitating smoother communication among team members.
 - **Effortless Decision-Making**: Our solution allows for advanced search capabilities, making it easy for management to retrieve and analyze relevant information without sifting through endless chat logs.
-- **Custom Functions**: Tailor the AI to fit specific business needs with custom functions,
+- **Custom Functions**: Tailor the AI to fit specific business needs with custom functions, 
 
 ## Commands
 
